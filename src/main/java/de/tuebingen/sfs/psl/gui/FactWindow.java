@@ -29,7 +29,6 @@ import de.tuebingen.sfs.psl.util.color.HslColor;
 import de.tuebingen.sfs.psl.util.data.RankingEntry;
 import de.tuebingen.sfs.psl.util.data.Tuple;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -129,12 +128,9 @@ public class FactWindow {
 	protected ObservableList<String> displayedAtoms;
 	protected StringProperty currentAtom = new SimpleStringProperty();
 	protected DoubleProperty currentScore = new SimpleDoubleProperty(-1.0);
-	protected BooleanProperty isTarget = new SimpleBooleanProperty(false);
 	protected BooleanProperty isPushed = new SimpleBooleanProperty(false);
 	protected BooleanProperty isDeleted = new SimpleBooleanProperty(false);
 	protected BooleanProperty buttonsDisabled = new SimpleBooleanProperty(false);
-	protected BooleanBinding isConfirmed = Bindings.and(isTarget.not(), currentScore.greaterThanOrEqualTo(1.0));
-	protected BooleanBinding isRejected = Bindings.and(isTarget.not(), currentScore.lessThanOrEqualTo(0.0));
 	protected RuleAtomGraph graph;
 	// Java variables
 	protected Stack<String> nextAtoms;

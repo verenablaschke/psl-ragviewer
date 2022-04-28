@@ -28,6 +28,10 @@ import de.tuebingen.sfs.psl.engine.RuleAtomGraph;
 import de.tuebingen.sfs.psl.talk.ConstantRenderer;
 import de.tuebingen.sfs.psl.talk.TalkingPredicate;
 import de.tuebingen.sfs.psl.talk.TalkingRule;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -38,7 +42,11 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 	private GuiPresenter presenter;
 	private EditOperationHandler opHandler;
 	private EtinenController controller;
-
+	
+	protected BooleanProperty isTarget = new SimpleBooleanProperty(false);
+	protected BooleanBinding isConfirmed = Bindings.and(isTarget.not(), currentScore.greaterThanOrEqualTo(1.0));
+	protected BooleanBinding isRejected = Bindings.and(isTarget.not(), currentScore.lessThanOrEqualTo(0.0));
+	
 	public EtinenFactWindow(GuiPresenter presenter, String atomName, String problemId, boolean showOnlyRagAtoms) {
 		this(presenter, null, null, problemId, atomName, null, null, null, null, null, null, showOnlyRagAtoms);
 	}
