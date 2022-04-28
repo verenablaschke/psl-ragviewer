@@ -93,7 +93,7 @@ public class StandaloneFactWindowLauncher extends Application {
 		Parent fWindowParent = fWindowloader.getRoot();
 		Scene fWindowScene = new Scene(fWindowParent);
 		fWindowScene.getStylesheets()
-				.add(getClass().getResource("/de/tuebingen/sfs/pls/gui/facts.css").toExternalForm());
+				.add(getClass().getResource("/de/tuebingen/sfs/psl/gui/facts.css").toExternalForm());
 		selectedItemStage.setScene(fWindowScene);
 		selectedItemStage.setAlwaysOnTop(true);
 		selectedItemStage.setTitle("Facts");

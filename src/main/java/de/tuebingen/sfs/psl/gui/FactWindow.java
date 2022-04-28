@@ -148,8 +148,8 @@ public class FactWindow {
 	protected Map<String, List<String>> atomToDisplayArguments;
 	// For correctly displaying EtinenTalkingRules/Predicates.
 	protected ConstantRenderer constantRenderer;
-	protected Map<String, String> encodedAtomToSurface;
-	protected Map<String, String> surfaceAtomToEncoded;
+	protected Map<String, String> encodedAtomToSurface = new HashMap<>();
+	protected Map<String, String> surfaceAtomToEncoded = new HashMap<>();
 
 	protected FactWindow() {
 		// For subclasses.
@@ -179,17 +179,15 @@ public class FactWindow {
 			Map<String, TalkingRule> talkingRules, Boolean presortSidebar, Boolean printPaneContentsToConsole,
 			Boolean showOnlyRagAtoms) {
 		this.pslProblem = pslProblem; // Can be null.
-		this.constantRenderer = constantRenderer; // Can be null.
 		this.graph = graph;
 		this.scoreMap = scoreMap;
 
 		if (atomName == null)
 			atomName = "";
 		atomToPredicate = null;
-		// The problemId can be null.
+
 		// Using null as first argument to properly set the current atom later,
 		// once the renderer has been set.
-		// TODO check
 		update(null, problemId);
 
 		// Only non-null if neither a presenter nor a PSL problem is given.
@@ -200,12 +198,8 @@ public class FactWindow {
 		this.printPaneContentsToConsole = printPaneContentsToConsole == null ? false : printPaneContentsToConsole;
 		this.showOnlyRagAtoms = showOnlyRagAtoms == null ? true : showOnlyRagAtoms;
 
-		// If atomToPredicate is non-null, the methods below were already called in
-		// update() above.
-		if (atomToPredicate == null) {
-			updateAtoms();
-		}
-
+		updateAtoms();
+		setRenderer(constantRenderer); // Can be null.
 		setCurrentAtom(atomName);
 	}
 
@@ -324,8 +318,7 @@ public class FactWindow {
 	public void update(String atom, String problemId, boolean forceUpdate, Functionality mode) {
 		setCurrentAtom(atom);
 		setMode(mode);
-		if (graph != null && scoreMap != null)
-			updateInfo();
+		updateInfo();
 	}
 
 	public void updateInfo() {
@@ -842,11 +835,11 @@ public class FactWindow {
 						});
 
 				ImageView sortIcon = new ImageView(
-						new Image(getClass().getResource("/de/tuebingen/sfs/eie/gui/utils/sort.png").toExternalForm()));
-				ImageView sortIconUp = new ImageView(new Image(
-						getClass().getResource("/de/tuebingen/sfs/eie/gui/utils/sort-up.png").toExternalForm()));
-				ImageView sortIconDown = new ImageView(new Image(
-						getClass().getResource("/de/tuebingen/sfs/eie/gui/utils/sort-down.png").toExternalForm()));
+						new Image(getClass().getResource("/de/tuebingen/sfs/psl/gui/sort.png").toExternalForm()));
+				ImageView sortIconUp = new ImageView(
+						new Image(getClass().getResource("/de/tuebingen/sfs/psl/gui/sort-up.png").toExternalForm()));
+				ImageView sortIconDown = new ImageView(
+						new Image(getClass().getResource("/de/tuebingen/sfs/psl/gui/sort-down.png").toExternalForm()));
 
 				Label arrow = new Label("");
 				arrow.setGraphic(sortIcon);
