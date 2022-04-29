@@ -95,14 +95,13 @@ public class StandaloneFactWindowLauncher extends Application {
 		fWindowScene.getStylesheets()
 				.add(getClass().getResource("/de/tuebingen/sfs/psl/gui/facts.css").toExternalForm());
 		selectedItemStage.setScene(fWindowScene);
-		selectedItemStage.setAlwaysOnTop(true);
-		selectedItemStage.setTitle("Facts");
+		selectedItemStage.setTitle("Inference results");
 		selectedItemStage.show();
 	}
 
 	public FactWindow createFactWindow() {
-		return new FactWindow(renderer, rag, talkingPreds, talkingRules, result, sortSidebar,
-				printExplanationPanesToConsole);
+		return new FactWindow(renderer, pslProblem, pslProblem.getName(), null, rag, result, talkingPreds, talkingRules,
+				sortSidebar, printExplanationPanesToConsole, null);
 	}
 
 }

@@ -190,9 +190,16 @@ public class FactWindow {
 		// once the renderer has been set.
 		update(null, problemId);
 
-		// Only non-null if neither a presenter nor a PSL problem is given.
-		this.talkingPreds = talkingPreds;
-		this.talkingRules = talkingRules;
+		if (pslProblem == null) {
+			System.err.println("?");
+			this.talkingPreds = talkingPreds;
+			this.talkingRules = talkingRules;
+		} else {
+			System.err.println("!");
+			this.talkingPreds = pslProblem.getTalkingPredicates();
+			this.talkingRules = pslProblem.getTalkingRules();
+		}
+		System.err.println(this.talkingPreds);
 
 		this.presortSidebar = presortSidebar == null ? false : presortSidebar;
 		this.printPaneContentsToConsole = printPaneContentsToConsole == null ? false : printPaneContentsToConsole;
