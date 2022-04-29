@@ -191,11 +191,9 @@ public class FactWindow {
 		update(null, problemId);
 
 		if (pslProblem == null) {
-			System.err.println("?");
 			this.talkingPreds = talkingPreds;
 			this.talkingRules = talkingRules;
 		} else {
-			System.err.println("!");
 			this.talkingPreds = pslProblem.getTalkingPredicates();
 			this.talkingRules = pslProblem.getTalkingRules();
 		}
@@ -662,10 +660,10 @@ public class FactWindow {
 		if (constantRenderer != null) {
 			List<String> args = getAtomElements(internalForm);
 			args = args.subList(1, args.size());
-			return tPred.verbalizeIdeaWithBelief(constantRenderer, score, args.toArray(new String[args.size()]));
+			return tPred.verbalizeIdeaAsSentence(constantRenderer, score, args.toArray(new String[args.size()]));
 		}
 		List<String> args = getDisplayArguments(internalForm);
-		return tPred.verbalizeIdeaWithBelief(score, args.toArray(new String[args.size()]));
+		return tPred.verbalizeIdeaAsSentence(score, args.toArray(new String[args.size()]));
 	}
 
 	public enum Functionality {
