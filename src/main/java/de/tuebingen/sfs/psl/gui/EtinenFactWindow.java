@@ -37,6 +37,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.ColumnConstraints;
 
 public class EtinenFactWindow extends FactWindow implements EtinenListener {
 
@@ -155,6 +156,42 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 		if (presenter != null) {
 			DatabaseManager dbManager = presenter.getInstance().getDbManager();
 			DataModelManipulator theoryManipulator = presenter.getManipulator();
+
+			topPane.getColumnConstraints().add(new ColumnConstraints(20, 20, 50));
+			topPane.getColumnConstraints().add(new ColumnConstraints(20, 20, 50));
+			topPane.getColumnConstraints().add(new ColumnConstraints(20, 20, 50));
+			topPane.getColumnConstraints().add(new ColumnConstraints(20, 20, 50));
+			topPane.getColumnConstraints().add(new ColumnConstraints(20, 20, 50));
+
+			confirm = new Button("➕");
+			confirm.setOpacity(0.4);
+			confirm.setMaxWidth(1.79);
+			confirm.getStyleClass().add("yes-btn");
+			topPane.add(confirm, 4, 0);
+
+			push = new Button("➕");
+			push.setOpacity(0.4);
+			push.setMaxWidth(1.79);
+			push.getStyleClass().add("ok-btn");
+			topPane.add(push, 5, 0);
+
+			release = new Button("➕");
+			release.setOpacity(0.4);
+			release.setMaxWidth(1.79);
+			release.getStyleClass().add("meh-btn");
+			topPane.add(release, 6, 0);
+
+			reject = new Button("➕");
+			reject.setOpacity(0.4);
+			reject.setMaxWidth(1.79);
+			reject.getStyleClass().add("naja-btn");
+			topPane.add(reject, 7, 0);
+
+			delete = new Button("➕");
+			delete.setOpacity(0.4);
+			delete.setMaxWidth(1.79);
+			delete.getStyleClass().add("no-btn");
+			topPane.add(delete, 8, 0);
 
 			confirm.setOnAction(event -> {
 				String atomString = getInternalForm(currentAtom.get());
