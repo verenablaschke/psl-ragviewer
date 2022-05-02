@@ -35,6 +35,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 
 public class EtinenFactWindow extends FactWindow implements EtinenListener {
@@ -42,11 +43,18 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 	private GuiPresenter presenter;
 	private EditOperationHandler opHandler;
 	private EtinenController controller;
-	
+
+	protected Button confirm;
+	protected Button push;
+	protected Button release;
+	protected Button reject;
+	protected Button delete;
+
+	protected Functionality mode = Functionality.FULL;
 	protected BooleanProperty isTarget = new SimpleBooleanProperty(false);
 	protected BooleanBinding isConfirmed = Bindings.and(isTarget.not(), currentScore.greaterThanOrEqualTo(1.0));
 	protected BooleanBinding isRejected = Bindings.and(isTarget.not(), currentScore.lessThanOrEqualTo(0.0));
-	
+
 	public EtinenFactWindow(GuiPresenter presenter, String atomName, String problemId, boolean showOnlyRagAtoms) {
 		this(presenter, null, null, problemId, atomName, null, null, null, null, null, null, showOnlyRagAtoms);
 	}
@@ -117,6 +125,10 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 	}
 
 	@Override
+	public void update(String atom, String problemId, boolean forceUpdate) {
+		update(atom, problemId, forceUpdate, mode);
+	}
+
 	public void update(String atom, String problemId, boolean forceUpdate, Functionality mode) {
 		setCurrentAtom(atom);
 		setMode(mode);
@@ -259,8 +271,17 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 	}
 
 	@Override
+	public void onFormSelection(String atomString) {
+		onFormSelection(atomString, mode, true);
+	}
+
+	@Override
+	public String onFormSelection(String atomString, boolean addToHistory) {
+		return onFormSelection(atomString, mode, addToHistory);
+	}
+
 	public String onFormSelection(String atomString, Functionality mode, boolean addToHistory) {
-		String internalForm = super.onFormSelection(atomString, mode, addToHistory);
+		String internalForm = super.onFormSelection(atomString, addToHistory);
 		if (presenter != null) {
 			isTarget.setValue(presenter.isTarget(activeProblem, internalForm));
 			isDeleted.setValue(presenter.isDeleted(activeProblem, internalForm));
@@ -273,6 +294,19 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 		return internalForm;
 	}
 
+	public void setMode(Functionality newMode) {
+		if (newMode != mode) {
+			if (newMode == Functionality.FULL) {
+				enableButton(push);
+				enableButton(release);
+			} else {
+				disableButton(push);
+				disableButton(release);
+			}
+			this.mode = newMode;
+		}
+	}
+
 	@Override
 	protected boolean isDeleted(String encodedAtom) {
 		return presenter != null && presenter.isDeleted(activeProblem, encodedAtom);
@@ -281,6 +315,10 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 	@Override
 	protected boolean priorApplied(String encodedAtom) {
 		return presenter != null && presenter.priorApplied(activeProblem, encodedAtom);
+	}
+
+	public enum Functionality {
+		FULL, NO_DB, DISABLED
 	}
 
 }

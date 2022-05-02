@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--<Button fx:id="exit" mnemonicParsing="false" styleClass="closebutton"
+<!--<Button fx:id="exit" mnemonicParsing="false" styleClass="closebutton" 
 	text="❌" /> -->
 <!-- <ProgressBar fx:id="bar" prefWidth="200.0" progress="0.0" GridPane.halignment="LEFT" 
 	/> -->
@@ -19,177 +19,192 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.TextFlow?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-      minWidth="-Infinity" prefWidth="900" prefHeight="600" xmlns="http://javafx.com/javafx/11.0.1">
-    <children>
-        <MenuBar>
-            <menus>
-                <Menu mnemonicParsing="false" text="View">
-                    <items>
-                        <CheckMenuItem fx:id="unusedAtomsChoice" mnemonicParsing="false" text="Show unused atoms"/>
-                        <CheckMenuItem fx:id="internalRuleRepChoice" mnemonicParsing="false"
-                                       text="Show internal rule representation"/>
-                        <CheckMenuItem fx:id="distToSatisfactionChoice" mnemonicParsing="false"
-                                       text="Show distance to satisfaction"/>
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
-        <GridPane fx:id="root" prefHeight="600.0">
-            <columnConstraints>
-                <ColumnConstraints hgrow="NEVER" maxWidth="700.0" minWidth="0.0" prefWidth="0.0"/>
-                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="680.0"/>
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
-            </rowConstraints>
-            <children>
-                <SplitPane dividerPositions="0.25" GridPane.columnIndex="1">
-                    <items>
-                        <GridPane fx:id="gridAtomPane">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" prefWidth="150.0"/>
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints maxHeight="126.0" minHeight="0.0" prefHeight="13.0" vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="345.0"
-                                                vgrow="ALWAYS"/>
-                                <RowConstraints maxHeight="73.0" minHeight="10.0" prefHeight="38.0" vgrow="SOMETIMES"/>
-                            </rowConstraints>
-                        </GridPane>
-                        <GridPane style="-fx-background-color: white;">
-                            <columnConstraints>
-                                <ColumnConstraints maxWidth="325.0" percentWidth="5.0" prefWidth="20.0"/>
-                                <ColumnConstraints maxWidth="325.0" percentWidth="5.0" prefWidth="20.0"/>
-                                <ColumnConstraints maxWidth="310.0" percentWidth="50.0" prefWidth="250.0"/>
-                                <ColumnConstraints maxWidth="325.0" minWidth="10.0" percentWidth="8.0"
-                                                   prefWidth="100.0"/>
-                                <ColumnConstraints maxWidth="325.0" percentWidth="8.0" prefWidth="20.0"/>
-                                <ColumnConstraints maxWidth="325.0" percentWidth="8.0" prefWidth="20.0"/>
-                                <ColumnConstraints maxWidth="325.0" percentWidth="8.0" prefWidth="20.0"/>
-                                <ColumnConstraints maxWidth="325.0" percentWidth="8.0" prefWidth="20.0"/>
-                                <ColumnConstraints maxWidth="325.0" percentWidth="8.0" prefWidth="20.0"/>
-                                <ColumnConstraints/>
-                                <ColumnConstraints/>
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="32.0" valignment="TOP"
-                                                vgrow="NEVER"/>
-                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="38.0" vgrow="NEVER"/>
-                                <RowConstraints maxHeight="20.0" minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="130.0"
-                                                vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="20.0" minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="130.0"
-                                                vgrow="SOMETIMES"/>
-                                <RowConstraints/>
-                            </rowConstraints>
-                            <children>
-                                <Button fx:id="back" mnemonicParsing="false" styleClass="back-btn" text="↩"
-                                        GridPane.columnIndex="0"/>
-                                <Button fx:id="fwrd" mnemonicParsing="false" styleClass="fwrd-btn" text="↪"
-                                        GridPane.columnIndex="1"/>
-                                <TextFlow fx:id="tf" maxHeight="1.7976931348623157E308"
-                                          maxWidth="1.7976931348623157E308" prefHeight="30.0" prefWidth="639.0"
-                                          GridPane.columnIndex="2" GridPane.columnSpan="8">
-                                    <GridPane.margin>
-                                        <Insets left="10.0"/>
-                                    </GridPane.margin>
-                                </TextFlow>
-                                <Button fx:id="confirm" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                                        opacity="0.4" styleClass="yes-btn" text="➕" GridPane.columnIndex="4"/>
-                                <Button fx:id="push" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                                        opacity="0.4" styleClass="ok-btn" text="ⓘ" GridPane.columnIndex="5"/>
-                                <Button fx:id="release" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                                        opacity="0.4" styleClass="meh-btn" text="❓" GridPane.columnIndex="6"/>
-                                <Button fx:id="reject" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                                        opacity="0.4" styleClass="naja-btn" text="❗" GridPane.columnIndex="7"/>
-                                <Button fx:id="delete" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                                        opacity="0.4" styleClass="no-btn" text="❌" GridPane.columnIndex="8"/>
-                                <Label fx:id="fPane" maxHeight="1.7976931348623157E308"
-                                       maxWidth="1.7976931348623157E308" prefHeight="50.0" prefWidth="48.0"
-                                       styleClass="f-pane2" GridPane.columnIndex="3">
-                                    <padding>
-                                        <Insets left="10.0"/>
-                                    </padding>
-                                    <font>
-                                        <Font size="9.0"/>
-                                    </font>
-                                    <GridPane.margin>
-                                        <Insets bottom="10.0"/>
-                                    </GridPane.margin>
-                                </Label>
-                                <VBox prefHeight="30.0" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS"
-                                      GridPane.rowIndex="1" GridPane.valignment="BOTTOM" GridPane.vgrow="NEVER">
-                                    <children>
-                                        <TextFlow fx:id="atomVerbalizationPane" prefHeight="40.0" prefWidth="533.0"
-                                                  styleClass="f-pane3" textAlignment="CENTER" VBox.vgrow="NEVER">
-                                            <VBox.margin>
-                                                <Insets/>
-                                            </VBox.margin>
-                                            <padding>
-                                                <Insets top="10.0"/>
-                                            </padding>
-                                            <opaqueInsets>
-                                                <Insets/>
-                                            </opaqueInsets>
-                                        </TextFlow>
-                                    </children>
-                                    <GridPane.margin>
-                                        <Insets bottom="10.0"/>
-                                    </GridPane.margin>
-                                    <padding>
-                                        <Insets left="5.0"/>
-                                    </padding>
-                                </VBox>
-                                <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                       mnemonicParsing="false" styleClass="reason-window-header" text="WHY NOT"
-                                       GridPane.columnIndex="0" GridPane.columnSpan="8" GridPane.rowIndex="2"/>
-                                <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="WHY"
-                                       GridPane.columnSpan="8" GridPane.rowIndex="4"/>
-                                <ScrollPane fx:id="scrollPane1" prefHeight="400.0" prefWidth="639.0"
-                                            GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
-                                    <content>
-                                        <TextFlow fx:id="whyNotPane" prefHeight="400.0" prefWidth="639.0"/>
+<VBox xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity"
+	maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+	prefWidth="900" prefHeight="600"
+	xmlns="http://javafx.com/javafx/11.0.1">
+	<children>
+		<MenuBar>
+			<menus>
+				<Menu mnemonicParsing="false" text="View">
+					<items>
+						<CheckMenuItem fx:id="unusedAtomsChoice"
+							mnemonicParsing="false" text="Show unused atoms" />
+						<CheckMenuItem fx:id="internalRuleRepChoice"
+							mnemonicParsing="false" text="Show internal rule representation" />
+						<CheckMenuItem fx:id="distToSatisfactionChoice"
+							mnemonicParsing="false" text="Show distance to satisfaction" />
+					</items>
+				</Menu>
+			</menus>
+		</MenuBar>
+		<GridPane fx:id="root" prefHeight="600.0">
+			<columnConstraints>
+				<ColumnConstraints hgrow="NEVER" maxWidth="700.0"
+					minWidth="0.0" prefWidth="0.0" />
+				<ColumnConstraints hgrow="ALWAYS" minWidth="10.0"
+					prefWidth="680.0" />
+			</columnConstraints>
+			<rowConstraints>
+				<RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+			</rowConstraints>
+			<children>
+				<SplitPane dividerPositions="0.25"
+					GridPane.columnIndex="1">
+					<items>
+						<GridPane fx:id="gridAtomPane">
+							<columnConstraints>
+								<ColumnConstraints hgrow="SOMETIMES"
+									minWidth="50.0" prefWidth="150.0" />
+							</columnConstraints>
+							<rowConstraints>
+								<RowConstraints maxHeight="126.0" minHeight="0.0"
+									prefHeight="13.0" vgrow="SOMETIMES" />
+								<RowConstraints
+									maxHeight="1.7976931348623157E308" minHeight="10.0"
+									prefHeight="345.0" vgrow="ALWAYS" />
+								<RowConstraints maxHeight="73.0" minHeight="10.0"
+									prefHeight="38.0" vgrow="SOMETIMES" />
+							</rowConstraints>
+						</GridPane>
+						<GridPane fx:id="topPane"
+							style="-fx-background-color: white;">
+							<columnConstraints>
+								<ColumnConstraints maxWidth="325.0"
+									percentWidth="5.0" prefWidth="20.0" />
+								<ColumnConstraints maxWidth="325.0"
+									percentWidth="5.0" prefWidth="20.0" />
+								<ColumnConstraints maxWidth="310.0"
+									percentWidth="50.0" prefWidth="250.0" />
+								<ColumnConstraints maxWidth="325.0"
+									minWidth="10.0" percentWidth="8.0" prefWidth="100.0" />
+								<ColumnConstraints maxWidth="325.0"
+									percentWidth="8.0" prefWidth="20.0" />
+								<ColumnConstraints maxWidth="325.0"
+									percentWidth="8.0" prefWidth="20.0" />
+								<ColumnConstraints maxWidth="325.0"
+									percentWidth="8.0" prefWidth="20.0" />
+								<ColumnConstraints maxWidth="325.0"
+									percentWidth="8.0" prefWidth="20.0" />
+								<ColumnConstraints maxWidth="325.0"
+									percentWidth="8.0" prefWidth="20.0" />
+								<ColumnConstraints />
+								<ColumnConstraints />
+							</columnConstraints>
+							<rowConstraints>
+								<RowConstraints maxHeight="60.0" minHeight="10.0"
+									prefHeight="32.0" valignment="TOP" vgrow="NEVER" />
+								<RowConstraints maxHeight="40.0" minHeight="10.0"
+									prefHeight="38.0" vgrow="NEVER" />
+								<RowConstraints maxHeight="20.0" minHeight="10.0"
+									prefHeight="20.0" vgrow="SOMETIMES" />
+								<RowConstraints
+									maxHeight="1.7976931348623157E308" minHeight="10.0"
+									prefHeight="130.0" vgrow="SOMETIMES" />
+								<RowConstraints maxHeight="20.0" minHeight="10.0"
+									prefHeight="20.0" vgrow="SOMETIMES" />
+								<RowConstraints
+									maxHeight="1.7976931348623157E308" minHeight="10.0"
+									prefHeight="130.0" vgrow="SOMETIMES" />
+								<RowConstraints />
+							</rowConstraints>
+							<children>
+								<Button fx:id="back" mnemonicParsing="false"
+									styleClass="back-btn" text="↩" GridPane.columnIndex="0" />
+								<Button fx:id="fwrd" mnemonicParsing="false"
+									styleClass="fwrd-btn" text="↪" GridPane.columnIndex="1" />
+								<TextFlow fx:id="tf" maxHeight="1.7976931348623157E308"
+									maxWidth="1.7976931348623157E308" prefHeight="30.0"
+									prefWidth="639.0" GridPane.columnIndex="2"
+									GridPane.columnSpan="8">
+									<GridPane.margin>
+										<Insets left="10.0" />
+									</GridPane.margin>
+								</TextFlow>
+								<Label fx:id="fPane" maxHeight="1.7976931348623157E308"
+									maxWidth="1.7976931348623157E308" prefHeight="50.0"
+									prefWidth="48.0" styleClass="f-pane2" GridPane.columnIndex="3">
+									<padding>
+										<Insets left="10.0" />
+									</padding>
+									<font>
+										<Font size="9.0" />
+									</font>
+									<GridPane.margin>
+										<Insets bottom="10.0" />
+									</GridPane.margin>
+								</Label>
+								<VBox prefHeight="30.0" GridPane.columnSpan="2147483647"
+									GridPane.hgrow="ALWAYS" GridPane.rowIndex="1"
+									GridPane.valignment="BOTTOM" GridPane.vgrow="NEVER">
+									<children>
+										<TextFlow fx:id="atomVerbalizationPane"
+											prefHeight="40.0" prefWidth="533.0" styleClass="f-pane3"
+											textAlignment="CENTER" VBox.vgrow="NEVER">
+											<VBox.margin>
+												<Insets />
+											</VBox.margin>
+											<padding>
+												<Insets top="10.0" />
+											</padding>
+											<opaqueInsets>
+												<Insets />
+											</opaqueInsets>
+										</TextFlow>
+									</children>
+									<GridPane.margin>
+										<Insets bottom="10.0" />
+									</GridPane.margin>
+									<padding>
+										<Insets left="5.0" />
+									</padding>
+								</VBox>
+								<Label maxHeight="1.7976931348623157E308"
+									maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+									styleClass="reason-window-header" text="WHY NOT"
+									GridPane.columnIndex="0" GridPane.columnSpan="8"
+									GridPane.rowIndex="2" />
+								<Label maxHeight="1.7976931348623157E308"
+									maxWidth="1.7976931348623157E308" text="WHY"
+									GridPane.columnSpan="8" GridPane.rowIndex="4" />
+								<ScrollPane fx:id="scrollPane1" prefHeight="400.0"
+									prefWidth="639.0" GridPane.columnSpan="2147483647"
+									GridPane.rowIndex="3">
+									<content>
+										<TextFlow fx:id="whyNotPane" prefHeight="400.0"
+											prefWidth="639.0" />
 
-                                        <!--
-                                            <GridPane fx:id="whyNotPane" GridPane.columnSpan="8" GridPane.rowIndex="3">
-                                                <columnConstraints>
-                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="314.0" minWidth="10.0" prefWidth="311.0" />
-                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="333.0" minWidth="10.0" prefWidth="328.0" />
-                                                </columnConstraints>
-                                                <rowConstraints>
-                                                    <RowConstraints maxHeight="108.0" minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
-                                                </rowConstraints>
-                                            </GridPane>-->
-                                    </content>
-                                </ScrollPane>
-                                <ScrollPane fx:id="scrollPane2" prefHeight="400.0" prefWidth="639.0"
-                                            GridPane.columnSpan="2147483647" GridPane.rowIndex="5">
-                                    <content>
-                                        <TextFlow fx:id="whyPane" prefHeight="400.0" prefWidth="639.0"/>
+										<!-- <GridPane fx:id="whyNotPane" GridPane.columnSpan="8" GridPane.rowIndex="3"> 
+											<columnConstraints> <ColumnConstraints hgrow="SOMETIMES" maxWidth="314.0" 
+											minWidth="10.0" prefWidth="311.0" /> <ColumnConstraints hgrow="SOMETIMES" 
+											maxWidth="333.0" minWidth="10.0" prefWidth="328.0" /> </columnConstraints> 
+											<rowConstraints> <RowConstraints maxHeight="108.0" minHeight="10.0" prefHeight="20.0" 
+											vgrow="SOMETIMES" /> </rowConstraints> </GridPane> -->
+									</content>
+								</ScrollPane>
+								<ScrollPane fx:id="scrollPane2" prefHeight="400.0"
+									prefWidth="639.0" GridPane.columnSpan="2147483647"
+									GridPane.rowIndex="5">
+									<content>
+										<TextFlow fx:id="whyPane" prefHeight="400.0"
+											prefWidth="639.0" />
 
-                                        <!--
-                                            <GridPane fx:id="whyPane" prefHeight="20.0" prefWidth="639.0">
-                                                <columnConstraints>
-                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="314.0" minWidth="10.0" prefWidth="310.0" />
-                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="329.0" minWidth="10.0" prefWidth="329.0" />
-                                                </columnConstraints>
-                                                <rowConstraints>
-                                                    <RowConstraints maxHeight="104.0" minHeight="10.0" prefHeight="104.0" vgrow="SOMETIMES" />
-                                                </rowConstraints>
-                                            </GridPane>
-                                -->
-                                    </content>
-                                </ScrollPane>
-                            </children>
-                            <padding>
-                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                            </padding>
-                        </GridPane>
-                    </items>
-                </SplitPane>
-            </children>
-        </GridPane>
-    </children>
+										<!-- <GridPane fx:id="whyPane" prefHeight="20.0" prefWidth="639.0"> 
+											<columnConstraints> <ColumnConstraints hgrow="SOMETIMES" maxWidth="314.0" 
+											minWidth="10.0" prefWidth="310.0" /> <ColumnConstraints hgrow="SOMETIMES" 
+											maxWidth="329.0" minWidth="10.0" prefWidth="329.0" /> </columnConstraints> 
+											<rowConstraints> <RowConstraints maxHeight="104.0" minHeight="10.0" prefHeight="104.0" 
+											vgrow="SOMETIMES" /> </rowConstraints> </GridPane> -->
+									</content>
+								</ScrollPane>
+							</children>
+							<padding>
+								<Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+							</padding>
+						</GridPane>
+					</items>
+				</SplitPane>
+			</children>
+		</GridPane>
+	</children>
 </VBox>

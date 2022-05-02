@@ -86,15 +86,7 @@ public class FactWindow {
 	@FXML
 	protected Button fwrd;
 	@FXML
-	protected Button confirm;
-	@FXML
-	protected Button push;
-	@FXML
-	protected Button release;
-	@FXML
-	protected Button reject;
-	@FXML
-	protected Button delete;
+	protected GridPane topPane;
 	@FXML
 	protected TextFlow tf;
 	@FXML
@@ -141,7 +133,6 @@ public class FactWindow {
 	protected boolean presortSidebar;
 	protected boolean displayDistToSatisfaction;
 	protected boolean printPaneContentsToConsole;
-	protected Functionality mode = Functionality.FULL;
 	// Maps for atom elements
 	protected Map<String, Double> scoreMap;
 	protected Map<String, String> atomToPredicate;
@@ -313,16 +304,7 @@ public class FactWindow {
 	}
 
 	public void update(String atom, String problemId, boolean forceUpdate) {
-		update(atom, problemId, forceUpdate, mode);
-	}
-
-	public void update(String atom, String problemId, Functionality mode) {
-		update(atom, problemId, false, mode);
-	}
-
-	public void update(String atom, String problemId, boolean forceUpdate, Functionality mode) {
 		setCurrentAtom(atom);
-		setMode(mode);
 		updateInfo();
 	}
 
@@ -395,18 +377,7 @@ public class FactWindow {
 												.concat(Bindings.when(isPushed).then(" (+)").otherwise(""))))));
 	}
 
-	public void setMode(Functionality newMode) {
-		if (newMode != mode) {
-			if (newMode == Functionality.FULL) {
-				enableButton(push);
-				enableButton(release);
-			} else {
-				disableButton(push);
-				disableButton(release);
-			}
-			this.mode = newMode;
-		}
-	}
+
 
 	public void setStage(Stage stage) {
 		this.stage = stage;
@@ -626,15 +597,7 @@ public class FactWindow {
 		onFormSelection(atomString, true);
 	}
 
-	public void onFormSelection(String atomString, boolean addToHistory) {
-		onFormSelection(atomString, mode, addToHistory);
-	}
-
-	public void onFormSelection(String atomString, Functionality mode) {
-		onFormSelection(atomString, mode, true);
-	}
-
-	public String onFormSelection(String atomString, Functionality mode, boolean addToHistory) {
+	public String onFormSelection(String atomString, boolean addToHistory) {
 		if (addToHistory) {
 			previousAtoms.push(currentAtom.get());
 			nextAtoms.clear();
@@ -664,10 +627,6 @@ public class FactWindow {
 		}
 		List<String> args = getDisplayArguments(internalForm);
 		return tPred.verbalizeIdeaAsSentence(score, args.toArray(new String[args.size()]));
-	}
-
-	public enum Functionality {
-		FULL, NO_DB, DISABLED
 	}
 
 	public class ExitHandler implements EventHandler<ActionEvent> {

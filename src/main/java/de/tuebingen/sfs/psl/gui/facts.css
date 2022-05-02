@@ -21,57 +21,7 @@
     -fx-font-family: "FontAwesome";
 }
 
-.yes-btn {
-    -fx-background-color: #0074D9;
-    -fx-background-radius: 10 0 0 10;
-    -fx-background-insets: 0;
-    -fx-text-fill: white;
-    -fx-border-radius: 10 0 0 10;
-    -fx-font-weight: bold;
-    -fx-font-family: "Helvetica";
 
-}
-
-.ok-btn {
-    -fx-background-color: #2ECC40;
-    -fx-background-radius: 0;
-    -fx-background-insets: 0;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-family: "Helvetica";
-
-}
-
-.meh-btn {
-    -fx-background-color: #FFDC00;
-    -fx-background-radius: 0;
-    -fx-background-insets: 0;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-family: "Helvetica";
-
-}
-
-.naja-btn {
-    -fx-background-color: orange;
-    -fx-background-radius: 0;
-    -fx-background-insets: 0;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-family: "Helvetica";
-
-}
-
-.no-btn {
-    -fx-background-color: red;
-    -fx-background-radius: 0 10 10 0;
-    -fx-background-insets: 0;
-    -fx-text-fill: white;
-    -fx-border-radius: 0 10 10 0;
-    -fx-font-weight: bold;
-    -fx-font-family: "Helvetica";
-
-}
 
 .back-btn {
     -fx-background-color: grey;
