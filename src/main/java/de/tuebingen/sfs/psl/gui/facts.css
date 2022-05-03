@@ -21,8 +21,6 @@
     -fx-font-family: "FontAwesome";
 }
 
-
-
 .back-btn {
     -fx-background-color: grey;
     -fx-background-radius: 10 0 0 10;
@@ -145,6 +143,10 @@
     -fx-border-radius: 2 2 2 2;
     -fx-border-color: #b19cd9;
     -fx-border-width: 4;
+}
+
+.bold {
+	-fx-font-weight: bold;
 }
 
 .black-font {

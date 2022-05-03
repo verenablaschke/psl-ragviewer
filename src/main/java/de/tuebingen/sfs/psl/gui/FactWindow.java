@@ -377,8 +377,6 @@ public class FactWindow {
 												.concat(Bindings.when(isPushed).then(" (+)").otherwise(""))))));
 	}
 
-
-
 	public void setStage(Stage stage) {
 		this.stage = stage;
 	}
@@ -489,9 +487,14 @@ public class FactWindow {
 		}
 		Map<String, TalkingRule> talkingRules = getTalkingRules();
 		String currentAtom = getInternalForm(this.currentAtom.get());
-		int globIndWhy = 0;
-		int globIndWhyNot = 0;
+
 		List<RankingEntry<String>> whyRules = new ArrayList<>();
+		if (graph.isFixed(currentAtom)) {
+			whyRules.add(new RankingEntry<String>("The value of this atom was fixed before the inference.", -1));
+			setExplanationPane(whyRules, whyPane);
+			return;
+		}
+
 		List<RankingEntry<String>> whyNotRules = new ArrayList<>();
 		for (Tuple tup : rag.getOutgoingLinks(currentAtom)) {
 			String rule = tup.get(1);
@@ -509,15 +512,14 @@ public class FactWindow {
 				if (status.equals("+")) {
 					String explanation = generateExplanation(talkingRules, ruleName, rule, currentAtom, rag, true);
 					whyRules.add(new RankingEntry<String>(explanation, rag.distanceToSatisfaction(rule)));
-					globIndWhy++;
 				}
 				if (rag.isEqualityRule(rule) || status.equals("-")) {
 					String explanation = generateExplanation(talkingRules, ruleName, rule, currentAtom, rag, false);
 					whyNotRules.add(new RankingEntry<String>(explanation, rag.distanceToSatisfaction(rule)));
-					globIndWhyNot++;
 				}
 			}
 		}
+
 		if (printPaneContentsToConsole) {
 			if (currentAtom.isEmpty()) {
 				System.out.println("[Empty atom.]");
@@ -754,6 +756,11 @@ public class FactWindow {
 											graph.atomToBaseColor(encoded, deleted), scoreMap, encoded);
 								setStyle("-fx-background-color:" + backgroundColor + ";");
 								getStyleClass().add("black-font");
+								if (graph.isFixed(encoded)) {
+									getStyleClass().remove("bold");
+								} else {
+									getStyleClass().add("bold");
+								}
 								getStyleClass().add("lw-cell-no-border");
 								double belief = scoreMap.get(encoded);
 								if (deleted) {
