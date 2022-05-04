@@ -743,6 +743,7 @@ public class FactWindow {
 
 						if (empty || item == null) {
 							setText(null);
+							setGraphic(null);
 							setStyle("-fx-background-color:white;");
 						} else {
 							if (displayedAtoms.contains(getDisplayForm(item))) {
@@ -755,12 +756,8 @@ public class FactWindow {
 									backgroundColor = getBackgroundColorForScore(
 											graph.atomToBaseColor(encoded, deleted), scoreMap, encoded);
 								setStyle("-fx-background-color:" + backgroundColor + ";");
+								getStyleClass().remove("white-font");
 								getStyleClass().add("black-font");
-								if (graph.isFixed(encoded)) {
-									getStyleClass().remove("bold");
-								} else {
-									getStyleClass().add("bold");
-								}
 								getStyleClass().add("lw-cell-no-border");
 								double belief = scoreMap.get(encoded);
 								if (deleted) {
@@ -773,6 +770,14 @@ public class FactWindow {
 								if (priorApplied(encoded))
 									displayForm = "(+) " + displayForm;
 								setText(displayForm);
+								Label fixedRep = new Label();
+								if (graph.isFixed(encoded)) {
+									fixedRep.setText("⚫");
+									fixedRep.setOpacity(0.4);
+								} else {
+									fixedRep.setText("⚪");
+								}
+								setGraphic(fixedRep);
 							}
 
 						}
