@@ -65,20 +65,6 @@
     -fx-focus-color: red;
 }
 
-.closebutton {
-    -fx-text-fill: orange;
-    -fx-effect: dropshadow(gaussian, orange, 10, 0, 0, 1);
-    -fx-background-radius: 10px;
-    -fx-min-width: 20px;
-    -fx-min-height: 20px;
-    -fx-background-color: white;
-    -fx-font-size: 13px;
-}
-
-.closebutton:hover {
-    -fx-cursor: hand;
-}
-
 .f-pane {
     -fx-background-color: #b3dbff; /*#33b5e7 */
     -fx-background-radius: 5 5 5 5;
@@ -98,7 +84,6 @@
 .f-pane2 {
     /*-fx-text-fill: #0074D9;*/
     -fx-text-fill: #8671ad;
-
 }
 
 .atom-label {
@@ -143,10 +128,6 @@
     -fx-border-radius: 2 2 2 2;
     -fx-border-color: #b19cd9;
     -fx-border-width: 4;
-}
-
-.bold {
-	-fx-font-weight: bold;
 }
 
 .black-font {

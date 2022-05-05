@@ -29,9 +29,7 @@ import de.tuebingen.sfs.psl.util.color.HslColor;
 import de.tuebingen.sfs.psl.util.data.RankingEntry;
 import de.tuebingen.sfs.psl.util.data.Tuple;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -86,9 +84,9 @@ public class FactWindow {
 	@FXML
 	protected Button fwrd;
 	@FXML
-	protected GridPane topPane;
+	protected GridPane detailPane;
 	@FXML
-	protected TextFlow tf;
+	protected TextFlow atomTitle;
 	@FXML
 	protected TextFlow atomVerbalizationPane;
 	@FXML
@@ -100,9 +98,11 @@ public class FactWindow {
 	@FXML
 	protected ScrollPane scrollPane2;
 	@FXML
-	protected Label fPane;
+	protected Label beliefValueLabel;
 	@FXML
 	protected GridPane gridAtomPane;
+	@FXML
+	protected Label sortLabel;
 	@FXML
 	protected CheckMenuItem unusedAtomsChoice;
 	@FXML
@@ -120,9 +120,6 @@ public class FactWindow {
 	protected ObservableList<String> displayedAtoms;
 	protected StringProperty currentAtom = new SimpleStringProperty();
 	protected DoubleProperty currentScore = new SimpleDoubleProperty(-1.0);
-	protected BooleanProperty isPushed = new SimpleBooleanProperty(false);
-	protected BooleanProperty isDeleted = new SimpleBooleanProperty(false);
-	protected BooleanProperty buttonsDisabled = new SimpleBooleanProperty(false);
 	protected RuleAtomGraph graph;
 	// Java variables
 	protected Stack<String> nextAtoms;
@@ -152,21 +149,21 @@ public class FactWindow {
 
 	public FactWindow(PslProblem pslProblem, RuleAtomGraph graph, Map<String, Double> scoreMap,
 			boolean showOnlyRagAtoms) {
-		this(null, pslProblem, null, null, graph, scoreMap, null, null, null, null, showOnlyRagAtoms);
+		this(null, pslProblem, null, graph, scoreMap, null, null, null, null, showOnlyRagAtoms);
 	}
 
 	public FactWindow(ConstantRenderer renderer, RuleAtomGraph rag, Map<String, TalkingPredicate> talkingPreds,
 			Map<String, TalkingRule> talkingRules, Map<String, Double> result, boolean presortSidebar,
 			boolean printPaneContentsToConsole) {
-		this(renderer, null, null, null, rag, result, talkingPreds, talkingRules, presortSidebar,
-				printPaneContentsToConsole, null);
+		this(renderer, null, null, rag, result, talkingPreds, talkingRules, presortSidebar, printPaneContentsToConsole,
+				null);
 	}
 
 	// 2 options:
 	// - StandaloneFactViewer: pslProblem, graph, scoreMap
 	// - RagViewer: graph, scoreMap, talkingPreds, talkingRules
-	protected FactWindow(ConstantRenderer constantRenderer, PslProblem pslProblem, String problemId, String atomName,
-			RuleAtomGraph graph, Map<String, Double> scoreMap, Map<String, TalkingPredicate> talkingPreds,
+	protected FactWindow(ConstantRenderer constantRenderer, PslProblem pslProblem, String atomName, RuleAtomGraph graph,
+			Map<String, Double> scoreMap, Map<String, TalkingPredicate> talkingPreds,
 			Map<String, TalkingRule> talkingRules, Boolean presortSidebar, Boolean printPaneContentsToConsole,
 			Boolean showOnlyRagAtoms) {
 		this.pslProblem = pslProblem; // Can be null.
@@ -176,10 +173,6 @@ public class FactWindow {
 		if (atomName == null)
 			atomName = "";
 		atomToPredicate = null;
-
-		// Using null as first argument to properly set the current atom later,
-		// once the renderer has been set.
-		update(null, problemId);
 
 		if (pslProblem == null) {
 			this.talkingPreds = talkingPreds;
@@ -299,11 +292,11 @@ public class FactWindow {
 		atomToDisplayArguments.put(atom, args);
 	}
 
-	public void update(String atom, String problemId) {
-		update(atom, problemId, false);
+	public void update(String atom) {
+		update(atom, false);
 	}
 
-	public void update(String atom, String problemId, boolean forceUpdate) {
+	public void update(String atom, boolean forceUpdate) {
 		setCurrentAtom(atom);
 		updateInfo();
 	}
@@ -319,13 +312,15 @@ public class FactWindow {
 
 	@FXML
 	public void initialize() {
+		update(currentAtom.get());
+
 		scrollAtomPane = new ScrollPane();
 		scrollAtomPane.setPannable(true);
 		scrollAtomPane.setFitToWidth(true);
 
 		scrollPane1.setFitToWidth(true);
 		scrollPane2.setFitToWidth(true);
-		fPane.setFont(Font.font("Verdana", FontWeight.BOLD, 14));
+		beliefValueLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 14));
 		atomText = updateAtomText(new Text());
 		// tf.getChildren().add(atomText);
 		// atomVerbalizationPane.getChildren().add(atomText);
@@ -369,12 +364,11 @@ public class FactWindow {
 		});
 
 		// Set various display possibilities for atom belief
-		fPane.textProperty()
-				.bind(Bindings.when(isDeleted).then("Deleted")
-						.otherwise(Bindings.when(currentScore.greaterThan(1.0)).then("\uD83D\uDC4D")
-								.otherwise(Bindings.when(currentScore.lessThan(0.0)).then("\uD83D\uDC4E")
-										.otherwise(Bindings.format(Locale.ENGLISH, "%.2f%%", currentScore.multiply(100))
-												.concat(Bindings.when(isPushed).then(" (+)").otherwise(""))))));
+		beliefValueLabel.textProperty().bind(Bindings.when(currentAtom.isEmpty()).then("")
+				.otherwise(Bindings.when(currentScore.greaterThan(1.0)).then("+")
+						.otherwise(Bindings.when(currentScore.lessThan(0.0)).then("-")
+								.otherwise(Bindings.format(Locale.ENGLISH, "%.2f%%", currentScore.multiply(100))))));
+
 	}
 
 	public void setStage(Stage stage) {
@@ -489,13 +483,17 @@ public class FactWindow {
 		String currentAtom = getInternalForm(this.currentAtom.get());
 
 		List<RankingEntry<String>> whyRules = new ArrayList<>();
+		List<RankingEntry<String>> whyNotRules = new ArrayList<>();
+
+		// If the atom's value wasn't inferred, we can hardcode the explanation:
 		if (graph.isFixed(currentAtom)) {
 			whyRules.add(new RankingEntry<String>("The value of this atom was fixed before the inference.", -1));
 			setExplanationPane(whyRules, whyPane);
+			whyNotRules.add(new RankingEntry<String>("The value of this atom was fixed before the inference.", -1));
+			setExplanationPane(whyNotRules, whyNotPane);
 			return;
 		}
 
-		List<RankingEntry<String>> whyNotRules = new ArrayList<>();
 		for (Tuple tup : rag.getOutgoingLinks(currentAtom)) {
 			String rule = tup.get(1);
 			if (notUnderPressureList.contains(rule)) {
@@ -583,7 +581,7 @@ public class FactWindow {
 			AtomVerbalizationRenderer.fillTextFlow(explanation, pane, this);
 			pane.getChildren().add(new Text(System.lineSeparator()));
 			final Separator separator = new Separator(Orientation.HORIZONTAL);
-			separator.prefWidthProperty().bind(tf.widthProperty());
+			separator.prefWidthProperty().bind(atomTitle.widthProperty());
 			pane.getChildren().add(separator);
 			pane.getChildren().add(new Text(System.lineSeparator()));
 			if (printPaneContentsToConsole) {
@@ -671,14 +669,12 @@ public class FactWindow {
 		int boxInd;
 		boolean tr;
 		int ordinal;
-		Label sortLabel;
 
 		public Task<Map<String, Double>> createTask() {
 			if (container != null) {
 				container.getChildren().clear();
 			}
 
-			sortLabel = new Label("");
 			sortLabel.setPrefWidth(Double.MAX_VALUE);
 			task = new ScoreTask();
 			ordinal = 0;
@@ -717,8 +713,8 @@ public class FactWindow {
 				displayedAtomsListView.setItems(filteredData);
 
 				Text atomText = updateAtomText(new Text());
-				tf.getChildren().clear();
-				tf.getChildren().add(atomText);
+				atomTitle.getChildren().clear();
+				atomTitle.getChildren().add(atomText);
 
 				if (!firstSelected.trim().isEmpty()) {
 					if (displayedAtoms.contains(firstSelected)) {
@@ -777,6 +773,7 @@ public class FactWindow {
 								} else {
 									fixedRep.setText("⚪");
 								}
+								fixedRep.getStyleClass().add("black-font");
 								setGraphic(fixedRep);
 							}
 
@@ -971,7 +968,6 @@ public class FactWindow {
 				});
 				gridAtomPane.add(gp, 0, 2);
 				gridAtomPane.add(displayedAtomsListView, 0, 1);
-				gridAtomPane.add(sortLabel, 0, 0);
 				gridAtomPane.getRowConstraints().get(0).setPrefHeight(20);
 
 				GraphService factsService = new GraphService();

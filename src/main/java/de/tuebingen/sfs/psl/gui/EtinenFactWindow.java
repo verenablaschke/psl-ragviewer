@@ -1,6 +1,7 @@
 // TODO move into etinen-gui module
 package de.tuebingen.sfs.psl.gui;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,6 +52,10 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 	protected Button reject;
 	protected Button delete;
 
+	protected BooleanProperty isPushed = new SimpleBooleanProperty(false);
+	protected BooleanProperty isDeleted = new SimpleBooleanProperty(false);
+	protected BooleanProperty buttonsDisabled = new SimpleBooleanProperty(false);
+
 	protected Functionality mode = Functionality.FULL;
 	protected BooleanProperty isTarget = new SimpleBooleanProperty(false);
 	protected BooleanBinding isConfirmed = Bindings.and(isTarget.not(), currentScore.greaterThanOrEqualTo(1.0));
@@ -92,9 +97,6 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 			atomName = "";
 		atomToPredicate = null;
 		// The problemId can be null.
-		// Using null as first argument to properly set the current atom later,
-		// once the renderer has been set.
-		update(null, problemId);
 
 		// Only non-null if neither a presenter nor a PSL problem is given.
 		this.talkingPreds = talkingPreds;
@@ -125,7 +127,6 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 		return allAtoms;
 	}
 
-	@Override
 	public void update(String atom, String problemId, boolean forceUpdate) {
 		update(atom, problemId, forceUpdate, mode);
 	}
@@ -147,12 +148,22 @@ public class EtinenFactWindow extends FactWindow implements EtinenListener {
 	@FXML
 	@Override
 	public void initialize() {
+		update(currentAtom.get(), problemId);
 		if (presenter != null) {
 			stage.setOnHidden(e -> {
 				presenter.setFactWindowClosed(true);
 			});
 		}
 		super.initialize();
+
+		// Set various display possibilities for atom belief
+		beliefValueLabel.textProperty()
+				.bind(Bindings.when(currentAtom.isEmpty()).then("").otherwise(Bindings.when(isDeleted).then("Deleted")
+						.otherwise(Bindings.when(currentScore.greaterThan(1.0)).then("\uD83D\uDC4D")
+								.otherwise(Bindings.when(currentScore.lessThan(0.0)).then("\uD83D\uDC4E")
+										.otherwise(Bindings.format(Locale.ENGLISH, "%.2f%%", currentScore.multiply(100))
+												.concat(Bindings.when(isPushed).then(" (+)").otherwise("")))))));
+
 		if (presenter != null) {
 			DatabaseManager dbManager = presenter.getInstance().getDbManager();
 			DataModelManipulator theoryManipulator = presenter.getManipulator();

@@ -100,7 +100,7 @@ public class StandaloneFactWindowLauncher extends Application {
 	}
 
 	public FactWindow createFactWindow() {
-		return new FactWindow(renderer, pslProblem, pslProblem.getName(), null, rag, result, talkingPreds, talkingRules,
+		return new FactWindow(renderer, pslProblem, null, rag, result, talkingPreds, talkingRules,
 				sortSidebar, printExplanationPanesToConsole, null);
 	}
 

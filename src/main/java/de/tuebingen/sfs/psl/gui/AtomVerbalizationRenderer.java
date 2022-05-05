@@ -1,13 +1,11 @@
 package de.tuebingen.sfs.psl.gui;
 
-import javafx.scene.control.Hyperlink;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
-
 import java.util.HashMap;
 import java.util.Stack;
+
+import javafx.scene.control.Hyperlink;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 public class AtomVerbalizationRenderer {
 	public static void fillTextFlow(String verbalization, TextFlow tf, FactWindow fw) {
@@ -116,7 +114,7 @@ public class AtomVerbalizationRenderer {
 							styles.append(modeToStyle.get(st.mode));
 						}
 					}
-					text.setFont(Font.font("Verdana", FontWeight.NORMAL, 14));
+//					text.setFont(Font.font("Verdana", FontWeight.NORMAL, 14));
 					text.setStyle(styles + "");
 				}
 			}
