@@ -21,14 +21,16 @@
 	<children>
 		<MenuBar>
 			<menus>
-				<Menu mnemonicParsing="false" text="View">
+				<Menu text="View">
 					<items>
 						<CheckMenuItem fx:id="unusedAtomsChoice"
-							mnemonicParsing="false" text="Show unused atoms" />
+							text="Show unused atoms" />
 						<CheckMenuItem fx:id="internalRuleRepChoice"
-							mnemonicParsing="false" text="Show internal rule representation" />
+							text="Show internal rule representation" />
 						<CheckMenuItem fx:id="distToSatisfactionChoice"
-							mnemonicParsing="false" text="Show distance to satisfaction" />
+							text="Show distance to satisfaction" />
+						<CheckMenuItem fx:id="counterfactualChoice"
+							text="Show counterfactual explanation" />
 					</items>
 				</Menu>
 			</menus>

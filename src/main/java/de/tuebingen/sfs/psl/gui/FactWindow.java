@@ -110,6 +110,8 @@ public class FactWindow {
 	protected CheckMenuItem internalRuleRepChoice;
 	@FXML
 	protected CheckMenuItem distToSatisfactionChoice;
+	@FXML
+	protected CheckMenuItem counterfactualChoice;
 	// JavaFX
 	protected Text atomText;
 	protected VBox container;
@@ -130,6 +132,7 @@ public class FactWindow {
 	String activeProblem;
 	protected boolean presortSidebar;
 	protected boolean displayDistToSatisfaction;
+	protected boolean displayCounterfactual;
 	protected boolean printPaneContentsToConsole;
 	// Maps for atom elements
 	protected Map<String, Double> scoreMap;
@@ -345,6 +348,11 @@ public class FactWindow {
 			displayDistToSatisfaction = distToSatisfactionChoice.isSelected();
 			setFacts(graph);
 		});
+		counterfactualChoice.setSelected(false);
+		counterfactualChoice.setOnAction((ActionEvent event) -> {
+			displayCounterfactual = counterfactualChoice.isSelected();
+			setFacts(graph);
+		});
 
 		previousAtoms = new Stack<>();
 		back.setMaxWidth(Double.MAX_VALUE);
@@ -510,10 +518,16 @@ public class FactWindow {
 				String status = atomToStatus.get(currentAtomIndex).get(1);
 				if (status.equals("+")) {
 					String explanation = generateExplanation(talkingRules, ruleName, rule, currentAtom, rag, true);
+					if (displayCounterfactual) {
+						explanation += generateCounterfacturalExplanation(rule, currentAtom);
+					}
 					whyRules.add(new RankingEntry<String>(explanation, rag.distanceToSatisfaction(rule)));
 				}
 				if (rag.isEqualityRule(rule) || status.equals("-")) {
 					String explanation = generateExplanation(talkingRules, ruleName, rule, currentAtom, rag, false);
+					if (displayCounterfactual) {
+						explanation += generateCounterfacturalExplanation(rule, currentAtom);
+					}
 					whyNotRules.add(new RankingEntry<String>(explanation, rag.distanceToSatisfaction(rule)));
 				}
 			}
@@ -534,6 +548,24 @@ public class FactWindow {
 		setExplanationPane(whyNotRules, whyNotPane);
 		if (printPaneContentsToConsole) {
 			System.out.println("---------\n");
+		}
+	}
+
+	protected String generateCounterfacturalExplanation(String groundingName, String currentAtom) {
+		double[] valueAndDist = graph.getCounterfactual(groundingName, currentAtom);
+		if (valueAndDist[0] <= 0 || valueAndDist[0] >= 1.0) {
+			return "";
+		}
+		if (showRuleVerbalization) {
+			StringBuilder sb = new StringBuilder();
+			// TODO talking pred!!
+			sb.append("\nIf ").append(currentAtom).append(" had had a value of ")
+					.append(String.format("%.2f", 100 * valueAndDist[0]));
+			sb.append("%, then the distance to satisfaction would have been ");
+			sb.append(String.format("%.3f", valueAndDist[1])).append(".");
+			return sb.toString();
+		} else {
+			return String.format("\n  %.3f: [%.2f]", valueAndDist[1], 100 * valueAndDist[0]);
 		}
 	}
 
