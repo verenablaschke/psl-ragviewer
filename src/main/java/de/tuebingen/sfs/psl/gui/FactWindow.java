@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.h2.util.StringUtils;
+import org.linqs.psl.model.rule.GroundRule;
 
 import de.tuebingen.sfs.psl.engine.PslProblem;
 import de.tuebingen.sfs.psl.engine.RuleAtomGraph;
@@ -540,9 +541,10 @@ public class FactWindow {
 			String contextAtom, RuleAtomGraph rag, boolean whyExplanation) {
 		if (!showRuleVerbalization) {
 			StringBuilder sb = new StringBuilder();
-			String rule = graph.getRuleStringForGrounding(groundingName);
-			rule = rule.replaceAll("', '", "','");
-			for (String element : rule.split("\\s+")) {
+			GroundRule rule = graph.getRuleForGrounding(groundingName);
+			sb.append(pslProblem.getNameForRule(rule.getRule())).append(": ");
+			String ruleStr = rule.toString().replaceAll("', '", "','");
+			for (String element : ruleStr.split("\\s+")) {
 				Matcher matcher = ATOM_START_PATTERN.matcher(element);
 				if (matcher.find()) {
 					element = element.replaceAll("','", "', '");
