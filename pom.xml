@@ -56,6 +56,12 @@
             <version>0.0.1-beta</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>de.tuebingen.sfs.psl.gui</groupId>
+            <artifactId>psl-ragviewer</artifactId>
+            <version>0.0.1-beta</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <name>PSL-RAGviewer</name>

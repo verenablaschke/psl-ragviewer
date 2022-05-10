@@ -70,16 +70,16 @@ public class FactWindow {
 
 	protected static final Pattern ATOM_START_PATTERN = Pattern.compile("\\w{4,}\\(");
 	// Display choices
-	boolean showOnlyRagAtoms;
-	boolean showRuleVerbalization = true;
-	Set<String> ragAtoms;
-	Set<String> scoreMapAtoms;
-	Set<String> unusedAtoms;
-	Set<String> nonpersistedAtoms;
-	boolean reloadingSidebar = false;
-	PslProblem pslProblem;
-	Map<String, TalkingPredicate> talkingPreds;
-	Map<String, TalkingRule> talkingRules;
+	protected boolean showOnlyRagAtoms;
+	protected boolean showRuleVerbalization = true;
+	protected Set<String> ragAtoms;
+	protected Set<String> scoreMapAtoms;
+	protected Set<String> unusedAtoms;
+	protected Set<String> nonpersistedAtoms;
+	protected boolean reloadingSidebar = false;
+	protected 	PslProblem pslProblem;
+	protected Map<String, TalkingPredicate> talkingPreds;
+	protected Map<String, TalkingRule> talkingRules;
 	@FXML
 	protected Button back;
 	@FXML
@@ -129,7 +129,7 @@ public class FactWindow {
 	protected Stack<String> previousAtoms;
 	protected double xOffset = 0;
 	protected double yOffset = 0;
-	String activeProblem;
+	protected String activeProblem;
 	protected boolean presortSidebar;
 	protected boolean displayDistToSatisfaction;
 	protected boolean displayCounterfactual;
@@ -842,11 +842,11 @@ public class FactWindow {
 						});
 
 				ImageView sortIcon = new ImageView(
-						new Image(getClass().getResource("/de/tuebingen/sfs/psl/gui/sort.png").toExternalForm()));
+						new Image(getClass().getResource("/sort.png").toExternalForm()));
 				ImageView sortIconUp = new ImageView(
-						new Image(getClass().getResource("/de/tuebingen/sfs/psl/gui/sort-up.png").toExternalForm()));
+						new Image(getClass().getResource("/sort-up.png").toExternalForm()));
 				ImageView sortIconDown = new ImageView(
-						new Image(getClass().getResource("/de/tuebingen/sfs/psl/gui/sort-down.png").toExternalForm()));
+						new Image(getClass().getResource("/sort-down.png").toExternalForm()));
 
 				Label arrow = new Label("");
 				arrow.setGraphic(sortIcon);

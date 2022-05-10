@@ -15,14 +15,14 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class StandaloneFactWindowLauncher extends Application {
-	static ConstantRenderer renderer = null;
-	static PslProblem pslProblem;
-	static RuleAtomGraph rag;
-	static Map<String, Double> result;
-	static boolean sortSidebar = false;
-	static boolean printExplanationPanesToConsole = false;
-	static Map<String, TalkingPredicate> talkingPreds = null;
-	static Map<String, TalkingRule> talkingRules = null;
+	protected static ConstantRenderer renderer = null;
+	protected static PslProblem pslProblem;
+	protected static RuleAtomGraph rag;
+	protected static Map<String, Double> result;
+	protected static boolean sortSidebar = false;
+	protected static boolean printExplanationPanesToConsole = false;
+	protected static Map<String, TalkingPredicate> talkingPreds = null;
+	protected static Map<String, TalkingRule> talkingRules = null;
 
 	public static void launchWithData(PslProblem pslProb, RuleAtomGraph graph, Map<String, Double> valueMap) {
 		pslProblem = pslProb;
@@ -86,14 +86,14 @@ public class StandaloneFactWindowLauncher extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		Stage selectedItemStage = new Stage();
 		FactWindow fWindow = createFactWindow();
-		FXMLLoader fWindowloader = new FXMLLoader(getClass().getResource("/de/tuebingen/sfs/psl/gui/FactWindow.fxml"));
+		FXMLLoader fWindowloader = new FXMLLoader(getClass().getResource("/FactWindow.fxml"));
 		fWindowloader.setController(fWindow);
 		fWindow.setStage(selectedItemStage);
 		fWindowloader.load();
 		Parent fWindowParent = fWindowloader.getRoot();
 		Scene fWindowScene = new Scene(fWindowParent);
 		fWindowScene.getStylesheets()
-				.add(getClass().getResource("/de/tuebingen/sfs/psl/gui/facts.css").toExternalForm());
+				.add(getClass().getResource("/facts.css").toExternalForm());
 		selectedItemStage.setScene(fWindowScene);
 		selectedItemStage.setTitle("Inference results");
 		selectedItemStage.show();
