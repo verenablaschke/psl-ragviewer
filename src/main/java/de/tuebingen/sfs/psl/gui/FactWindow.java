@@ -286,7 +286,7 @@ public class FactWindow {
 		TalkingPredicate pred = getTalkingPredicate(atomElems.get(0));
 		String surface = atom;
 		List<String> args = atomElems.subList(1, atomElems.size());
-		if (constantRenderer != null) {
+		if (constantRenderer != null && pred != null) {
 			args = pred.retrieveArguments(constantRenderer, args.toArray(new String[atomElems.size() - 1]));
 			surface = atomElems.get(0) + "(" + String.join(", ", args) + ")";
 		}
