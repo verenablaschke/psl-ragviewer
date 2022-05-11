@@ -3,6 +3,7 @@ package de.tuebingen.sfs.psl.gui;
 import java.util.HashMap;
 import java.util.Stack;
 
+import javafx.geometry.Insets;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -100,6 +101,7 @@ public class AtomVerbalizationRenderer {
 					String linkEntry = entry;
 					String linkText = (optional.isEmpty()) ? entry : optional;
 					Hyperlink link = new Hyperlink(linkText);
+					link.setPadding(new Insets(0));
 					tf.getChildren().add(link);
 					link.setOnAction(event -> {
 						fw.onFormSelection(linkEntry);
