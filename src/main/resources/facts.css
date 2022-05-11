@@ -1,26 +1,5 @@
 /* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
 
-.searchPane {
-    -fx-background-color: blue;
-
-}
-
-#bdg {
-    -fx-background-color: blue;
-}
-
-.key:pressed {
-    -fx-background-color: blue;
-}
-
-.key:hover {
-    -fx-background-color: blue;
-}
-
-.glyph-icon {
-    -fx-font-family: "FontAwesome";
-}
-
 .back-btn {
     -fx-background-color: grey;
     -fx-background-radius: 10 0 0 10;
@@ -43,37 +22,7 @@
     -fx-font-family: "Helvetica";
 }
 
-.factWindow-panel {
-    -fx-background-color: transparent;
-    -fx-background-radius: 5 5 5 5;
-    -fx-background-insets: 5 5 5 5;
-}
-
-.factWindow-content {
-    -fx-effect: dropshadow(gaussian, lightblue, 10, 0.5, 0.0, 0.0);
-    -fx-background-color: white;
-    -fx-background-radius: 5 5 5 5;
-    -fx-background-insets: 5 5 5 5;
-}
-
-.factWindow-container {
-    -fx-background-color: white;
-}
-
-.text-field.error {
-    -fx-text-box-border: red;
-    -fx-focus-color: red;
-}
-
-.f-pane {
-    -fx-background-color: #b3dbff; /*#33b5e7 */
-    -fx-background-radius: 5 5 5 5;
-    -fx-background-insets: 5 0 5 0;
-    -fx-text-fill: #0074D9;
-
-}
-
-.f-pane3 {
+.atomVerb {
     -fx-background-radius: 2 2 2 2;
     -fx-background-insets: 2 2 2 2;
     -fx-border-radius: 2 2 2 2;
@@ -81,40 +30,8 @@
     -fx-border-width: 2;
 }
 
-.f-pane2 {
-    /*-fx-text-fill: #0074D9;*/
+.beliefVal {
     -fx-text-fill: #8671ad;
-}
-
-.atom-label {
-    -fx-text-fill: #0000EE;
-    -fx-underline: true;
-}
-
-.atom-label:hover {
-    -fx-cursor: hand;
-}
-
-.atom-label:pressed {
-    -fx-text-fill: #800080
-}
-
-#atoms-panel-label {
-    -fx-padding: 10;
-    -fx-border-width: 0 0 2 0;
-    -fx-border-color: slategray;
-    -fx-background-color: white;
-}
-
-#atoms-panel-label:hover {
-    -fx-text-fill: white;
-    -fx-background-color: slategray;
-}
-
-#atoms-panel-label:focused {
-    -fx-text-fill: white;
-    -fx-background-color: slategray;
-    -fx-cursor: hand;
 }
 
 .lw-cell-no-border {
@@ -138,35 +55,6 @@
     -fx-text-fill: white;
 }
 
-.table-row-border {
-    -fx-background: -fx-control-inner-background;
-    -fx-background-color: -fx-table-cell-border-color, -fx-background;
-    -fx-background-insets: 0, 0 0 1 0;
-    -fx-table-cell-border-color: derive(-fx-color, 5%);
-    -fx-border-style: solid line-join round;
-    -fx-border-color: #b19cd9;
-    -fx-padding: -1;
-}
-
 .table-row-deleted .text {
     -fx-strikethrough: true;
-}
-
-.value-search-operator-combobox .arrow-button {
-    -fx-background-color: transparent;
-    -fx-padding: 0em 0em 0em 0em;
-}
-
-.value-search-operator-combobox .arrow-button .arrow {
-    -fx-background-color: transparent;
-    -fx-padding: 0em 0em 0em 0em;
-}
-
-.btn-applied {
-    -fx-border-color: black;
-    -fx-border-width: 2 2 2 2;
-}
-
-.btn-disabled {
-    -fx-background-color: #cccccc;
 }

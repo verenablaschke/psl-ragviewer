@@ -85,8 +85,6 @@ public class FactWindow {
 	@FXML
 	protected Button fwrd;
 	@FXML
-	protected GridPane detailPane;
-	@FXML
 	protected TextFlow atomTitle;
 	@FXML
 	protected TextFlow atomVerbalizationPane;
@@ -100,8 +98,6 @@ public class FactWindow {
 	protected ScrollPane scrollPane2;
 	@FXML
 	protected Label beliefValueLabel;
-	@FXML
-	protected GridPane gridAtomPane;
 	@FXML
 	protected Label sortLabel;
 	@FXML
@@ -118,7 +114,10 @@ public class FactWindow {
 	protected Stage stage;
 	protected Stage selectedItemStage;
 	protected ScrollPane scrollAtomPane;
+	@FXML
 	protected ListView<String> displayedAtomsListView;
+	@FXML
+	protected GridPane atomFilter;
 	// Observables
 	protected ObservableList<String> displayedAtoms;
 	protected StringProperty currentAtom = new SimpleStringProperty();
@@ -376,7 +375,7 @@ public class FactWindow {
 		beliefValueLabel.textProperty().bind(Bindings.when(currentAtom.isEmpty()).then("")
 				.otherwise(Bindings.when(currentScore.greaterThan(1.0)).then("+")
 						.otherwise(Bindings.when(currentScore.lessThan(0.0)).then("-")
-								.otherwise(Bindings.format(Locale.ENGLISH, "%.2f%%", currentScore.multiply(100))))));
+								.otherwise(Bindings.format(Locale.ENGLISH, "%.2f %%", currentScore.multiply(100))))));
 
 	}
 
@@ -716,10 +715,6 @@ public class FactWindow {
 				scoreMap = task.getValue();
 				displayedAtoms = FXCollections.observableArrayList();
 
-				displayedAtomsListView = new ListView<>();
-
-				// fPane.setText("Value of current atomText: " +
-				// scoreMap.get(currentAtom.get()));
 				if (!currentAtom.get().isEmpty()) {
 					onFormSelection(currentAtom.get(), false);
 				}
@@ -887,10 +882,10 @@ public class FactWindow {
 				}
 
 				// The (nested) list of options for specifying a predicate and its arguments.
-				GridPane gp = new GridPane();
+				atomFilter.getChildren().clear();
 				ColumnConstraints cc = new ColumnConstraints();
 				cc.setPercentWidth(100);
-				gp.getColumnConstraints().add(cc);
+				atomFilter.getColumnConstraints().add(cc);
 
 				// Initial set-up.
 				ComboBox<String> predNameBox = new ComboBox<>();
@@ -900,7 +895,7 @@ public class FactWindow {
 				predNameBox.getItems().add(""); // default value
 				predNameBox.getItems().addAll(sortedPredNames);
 				// cb.setEditable(true);
-				gp.add(predNameBox, 0, 0);
+				atomFilter.add(predNameBox, 0, 0);
 
 				predNameBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 					public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -921,15 +916,15 @@ public class FactWindow {
 						}
 
 						// Add the predNameBox again.
-						gp.getChildren().clear();
+						atomFilter.getChildren().clear();
 						double percentages = 100 / (argNum + 1);
-						gp.getColumnConstraints().clear();
+						atomFilter.getColumnConstraints().clear();
 						for (int i = 0; i < argNum + 1; i++) {
 							ColumnConstraints cc1 = new ColumnConstraints();
 							cc1.setPercentWidth(percentages);
-							gp.getColumnConstraints().add(cc1);
+							atomFilter.getColumnConstraints().add(cc1);
 						}
-						gp.add(predNameBox, 0, 0);
+						atomFilter.add(predNameBox, 0, 0);
 
 						// Add all applicable argument boxes.
 						boxInd = 0;
@@ -939,7 +934,7 @@ public class FactWindow {
 							ComboBox<String> predArgBox = new ComboBox<>();
 							predArgBoxes.add(predArgBox);
 							predArgBox.setPrefWidth(Double.MAX_VALUE);
-							gp.add(predArgBox, boxInd, 0);
+							atomFilter.add(predArgBox, boxInd, 0);
 
 							// Figure out the possible values and sort them.
 							boolean isNumeric = true;
@@ -1000,9 +995,6 @@ public class FactWindow {
 						}
 					}
 				});
-				gridAtomPane.add(gp, 0, 2);
-				gridAtomPane.add(displayedAtomsListView, 0, 1);
-				gridAtomPane.getRowConstraints().get(0).setPrefHeight(20);
 
 				GraphService factsService = new GraphService();
 				factsService.start();

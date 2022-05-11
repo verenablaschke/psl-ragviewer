@@ -116,7 +116,6 @@ public class AtomVerbalizationRenderer {
 							styles.append(modeToStyle.get(st.mode));
 						}
 					}
-//					text.setFont(Font.font("Verdana", FontWeight.NORMAL, 14));
 					text.setStyle(styles + "");
 				}
 			}
