@@ -17,6 +17,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.HBox;
 import org.h2.util.StringUtils;
 import org.linqs.psl.model.rule.GroundRule;
@@ -46,15 +50,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -82,7 +77,7 @@ public class FactWindow {
 	protected Map<String, TalkingPredicate> talkingPreds;
 	protected Map<String, TalkingRule> talkingRules;
 	@FXML
-	protected HBox detailBox;
+	protected HBox detailBox; // used by EtinenFactWindow
 	@FXML
 	protected Button back;
 	@FXML
@@ -92,13 +87,13 @@ public class FactWindow {
 	@FXML
 	protected TextFlow atomVerbalizationPane;
 	@FXML
-	protected TextFlow whyPane;
+	protected VBox whyNotBox;
 	@FXML
-	protected TextFlow whyNotPane;
+	protected ScrollPane whyNotScrollPane;
 	@FXML
-	protected ScrollPane scrollPane1;
+	protected VBox whyBox;
 	@FXML
-	protected ScrollPane scrollPane2;
+	protected ScrollPane whyScrollPane;
 	@FXML
 	protected Label beliefValueLabel;
 	@FXML
@@ -324,8 +319,6 @@ public class FactWindow {
 		scrollAtomPane.setPannable(true);
 		scrollAtomPane.setFitToWidth(true);
 
-		scrollPane1.setFitToWidth(true);
-		scrollPane2.setFitToWidth(true);
 		beliefValueLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 14));
 		atomText = updateAtomText(new Text());
 		// tf.getChildren().add(atomText);
@@ -476,16 +469,9 @@ public class FactWindow {
 	}
 
 	public void setFacts(RuleAtomGraph rag) {
-		if (whyPane != null) {
-			whyPane.getChildren().clear();
-		}
-		if (whyNotPane != null) {
-			whyNotPane.getChildren().clear();
-		}
-		// whyPane.getChildren().clear();
-		// whyNotPane.getChildren().clear();
-		// whyPane.getChildren().removeAll(whyPane.getChildren());
-		// whyNotPane.getChildren().removeAll(whyNotPane.getChildren());
+		whyBox.getChildren().clear();
+		whyNotBox.getChildren().clear();
+
 		List<String> notUnderPressureList = new ArrayList<>();
 		for (RankingEntry<String> s : rag.rankGroundingsByPressure(Double.NEGATIVE_INFINITY)) {
 			notUnderPressureList.add(s.key);
@@ -493,15 +479,15 @@ public class FactWindow {
 		Map<String, TalkingRule> talkingRules = getTalkingRules();
 		String currentAtom = getInternalForm(this.currentAtom.get());
 
-		List<RankingEntry<String>> whyRules = new ArrayList<>();
-		List<RankingEntry<String>> whyNotRules = new ArrayList<>();
+		List<RankingEntry<Pair<String, Boolean>>> whyRules = new ArrayList<>();
+		List<RankingEntry<Pair<String, Boolean>>> whyNotRules = new ArrayList<>();
 
 		// If the atom's value wasn't inferred, we can hardcode the explanation:
 		if (graph.isFixed(currentAtom)) {
-			whyRules.add(new RankingEntry<String>("The value of this atom was fixed before the inference.", -1));
-			setExplanationPane(whyRules, whyPane);
-			whyNotRules.add(new RankingEntry<String>("The value of this atom was fixed before the inference.", -1));
-			setExplanationPane(whyNotRules, whyNotPane);
+			whyRules.add(new RankingEntry<Pair<String, Boolean>>(new Pair<>("The value of this atom was fixed before the inference.", true), -1));
+			setExplanationBox(whyRules, whyBox);
+			whyNotRules.add(new RankingEntry<Pair<String, Boolean>>(new Pair<>("The value of this atom was fixed before the inference.", true), -1));
+			setExplanationBox(whyNotRules, whyNotBox);
 			return;
 		}
 
@@ -519,18 +505,10 @@ public class FactWindow {
 				}
 				String status = atomToStatus.get(currentAtomIndex).get(1);
 				if (status.equals("+")) {
-					String explanation = generateExplanation(talkingRules, ruleName, rule, currentAtom, rag, true);
-					if (displayCounterfactual) {
-						explanation += generateCounterfacturalExplanation(rule, currentAtom);
-					}
-					whyRules.add(new RankingEntry<String>(explanation, rag.distanceToSatisfaction(rule)));
+					whyRules.add(generateWeightedExplanation(ruleName, rule, currentAtom, rag, true));
 				}
 				if (rag.isEqualityRule(rule) || status.equals("-")) {
-					String explanation = generateExplanation(talkingRules, ruleName, rule, currentAtom, rag, false);
-					if (displayCounterfactual) {
-						explanation += generateCounterfacturalExplanation(rule, currentAtom);
-					}
-					whyNotRules.add(new RankingEntry<String>(explanation, rag.distanceToSatisfaction(rule)));
+					whyNotRules.add(generateWeightedExplanation(ruleName, rule, currentAtom, rag, false));
 				}
 			}
 		}
@@ -543,18 +521,29 @@ public class FactWindow {
 			}
 			System.out.println("WHY ? (WHY NOT LESS LIKELY / Rules pushing belief upwards)");
 		}
-		setExplanationPane(whyRules, whyPane);
+		setExplanationBox(whyRules, whyBox);
 		if (printPaneContentsToConsole) {
 			System.out.println("WHY NOT ? (WHY NOT MORE LIKELY / Rules pushing belief downwards)");
 		}
-		setExplanationPane(whyNotRules, whyNotPane);
+		setExplanationBox(whyNotRules, whyNotBox);
 		if (printPaneContentsToConsole) {
 			System.out.println("---------\n");
 		}
 	}
 
-	protected String generateCounterfacturalExplanation(String groundingName, String currentAtom) {
-		double[] valueAndDist = graph.getCounterfactual(groundingName, currentAtom);
+	protected RankingEntry<Pair<String, Boolean>> generateWeightedExplanation(String ruleName, String groundingName,
+															   String contextAtom, RuleAtomGraph rag, boolean whyExplanation) {
+		String explanation = generateExplanation(talkingRules, ruleName, groundingName, contextAtom, rag, true);
+		double[] counterfactualValueAndDist = graph.getCounterfactual(groundingName, contextAtom);
+		double dist = rag.distanceToSatisfaction(groundingName);
+		boolean influence = Math.abs(dist - counterfactualValueAndDist[1]) >= 0.0000001;
+		if (displayCounterfactual) {
+			explanation += generateCounterfacturalExplanation(counterfactualValueAndDist, groundingName, contextAtom);
+		}
+		return new RankingEntry<Pair<String, Boolean>>(new Pair<>(explanation, influence), dist);
+	}
+
+	protected String generateCounterfacturalExplanation(double[] valueAndDist, String groundingName, String currentAtom) {
 		if (valueAndDist[0] <= 0 || valueAndDist[0] >= 1.0) {
 			return "";
 		}
@@ -607,22 +596,50 @@ public class FactWindow {
 				whyExplanation);
 	}
 
-	protected void setExplanationPane(List<RankingEntry<String>> entries, TextFlow pane) {
+	protected void setExplanationBox(List<RankingEntry<Pair<String, Boolean>>> entries, VBox vbox) {
+		vbox.getChildren().clear();
 		Collections.sort(entries, Collections.reverseOrder());
-		for (RankingEntry<String> entry : entries) {
-			String explanation = entry.key;
+		for (RankingEntry<Pair<String, Boolean>> entry : entries){
+			String explanation = entry.key.first;
 			if (displayDistToSatisfaction) {
 				explanation = String.format("%.3f: %s", entry.value, explanation);
 			}
-			AtomVerbalizationRenderer.fillTextFlow(explanation, pane, this);
-			pane.getChildren().add(new Text(System.lineSeparator()));
+			TextFlow textFlow = new TextFlow();
+			AtomVerbalizationRenderer.fillTextFlow(explanation, textFlow, FactWindow.this, true);
+			textFlow.prefWidthProperty().bind(whyNotScrollPane.widthProperty().subtract(40));
+
+			ContextMenu menu = new ContextMenu();
+			MenuItem copyItem = new MenuItem("Copy explanation to clipboard");
+			menu.getItems().add(copyItem);
+			final String finalExplanation = explanation;
+			copyItem.setOnAction((ActionEvent e) -> {
+				final Clipboard clipboard = Clipboard.getSystemClipboard();
+				final ClipboardContent content = new ClipboardContent();
+				content.putString(finalExplanation);
+				clipboard.setContent(content);
+			});
+			textFlow.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
+				@Override
+				public void handle(ContextMenuEvent event) {
+					menu.show(textFlow, event.getScreenX(), event.getScreenY());
+				}
+			});
+
+			vbox.getChildren().add(textFlow);
+
+			// Add a horizontal line as separator
 			final Separator separator = new Separator(Orientation.HORIZONTAL);
-			separator.prefWidthProperty().bind(atomTitle.widthProperty());
-			pane.getChildren().add(separator);
-			pane.getChildren().add(new Text(System.lineSeparator()));
+			separator.prefWidthProperty().bind(textFlow.widthProperty());
+			vbox.getChildren().add(separator);
+
 			if (printPaneContentsToConsole) {
 				System.out.println(explanation);
 			}
+		}
+		// Remove the last separator
+		int nChildren = vbox.getChildren().size();
+		if (nChildren > 3) {
+			vbox.getChildren().remove(nChildren - 3, nChildren);
 		}
 	}
 
@@ -646,7 +663,7 @@ public class FactWindow {
 		TalkingPredicate tPred = getTalkingPredicate(pred);
 		String verbalization = verbalizeAtom(tPred, internalForm, score);
 		atomVerbalizationPane.getChildren().clear();
-		AtomVerbalizationRenderer.fillTextFlow(verbalization, atomVerbalizationPane, this);
+		AtomVerbalizationRenderer.fillTextFlow(verbalization, atomVerbalizationPane, this, true);
 		// atomVerbalizationPane.setText("TODO: generate text based on TalkingPredicate
 		// object.");
 		setFacts(graph);
@@ -759,7 +776,7 @@ public class FactWindow {
 					String verbalization = verbalizeAtom(tPred, encoded, score);
 					atomVerbalizationPane.getChildren().clear();
 					atomVerbalizationPane.setStyle("-fx-padding: 3 0 0 0;");
-					AtomVerbalizationRenderer.fillTextFlow(verbalization, atomVerbalizationPane, getWindow());
+					AtomVerbalizationRenderer.fillTextFlow(verbalization, atomVerbalizationPane, getWindow(), true);
 				}
 
 				// listView.set .setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -1026,6 +1043,32 @@ public class FactWindow {
 				setFacts(graph);
 			});
 			return task;
+		}
+	}
+
+	public class Pair<T, U> {
+		public T first;
+		public U second;
+
+		public Pair(T first, U second) {
+			this.first = first;
+			this.second = second;
+		}
+
+		public String toString() {
+			return "(" + first + "," + second + ")";
+		}
+
+		public int hashCode() {
+			return toString().hashCode();
+		}
+
+		public boolean equals(Object o) {
+			if (o instanceof Pair<?, ?>) {
+				Pair<?, ?> otherPair = (Pair<?, ?>) o;
+				return (otherPair.first.equals(first) && otherPair.second.equals(second));
+			}
+			return false;
 		}
 	}
 

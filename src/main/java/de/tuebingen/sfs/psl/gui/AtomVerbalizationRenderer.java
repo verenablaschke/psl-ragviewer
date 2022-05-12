@@ -9,7 +9,8 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 public class AtomVerbalizationRenderer {
-	public static void fillTextFlow(String verbalization, TextFlow tf, FactWindow fw) {
+	public static void fillTextFlow(String verbalization, TextFlow tf, FactWindow fw, boolean influencialRule) {
+		// TODO use value of influencialRule
 		HashMap<Mode, String> modeToStyle = new HashMap<>();
 
 		Stack<State> stack = new Stack<>();

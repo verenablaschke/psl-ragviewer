@@ -58,3 +58,7 @@
 .table-row-deleted .text {
     -fx-strikethrough: true;
 }
+
+.separator {
+    -fx-padding: 5 0 3 0;
+}

@@ -80,20 +80,18 @@
                             </opaqueInsets>
                         </TextFlow>
                         <Label style="-fx-padding: 13 0 3 0;" text="Why is the value not higher?"/>
-                        <ScrollPane fx:id="scrollPane1" prefHeight="400.0"
-                                    prefWidth="639.0" style="-fx-padding: 2 10 2 10;">
+                        <ScrollPane fx:id="whyNotScrollPane" prefHeight="400.0" VBox.vgrow="ALWAYS"
+                                    style="-fx-padding: 2 10 2 10;">
                             <content>
-                                <TextFlow fx:id="whyNotPane" prefHeight="400.0"
-                                          prefWidth="639.0"/>
+                                <VBox fx:id="whyNotBox"/>
                             </content>
                         </ScrollPane>
                         <Label style="-fx-padding: 13 0 3 0;"
                                text="Why is the value not lower?"/>
-                        <ScrollPane fx:id="scrollPane2" prefHeight="400.0"
-                                    prefWidth="639.0" style="-fx-padding: 2 10 2 10;">
+                        <ScrollPane fx:id="whyScrollPane" prefHeight="400.0" VBox.vgrow="ALWAYS"
+                                    style="-fx-padding: 2 10 2 10;">
                             <content>
-                                <TextFlow fx:id="whyPane" prefHeight="400.0"
-                                          prefWidth="639.0"/>
+                                <VBox fx:id="whyBox"/>
                             </content>
                         </ScrollPane>
                     </children>
