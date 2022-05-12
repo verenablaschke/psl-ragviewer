@@ -48,7 +48,7 @@
                 <VBox fx:id="detailPane"
                       style="-fx-background-color: white;" VBox.vgrow="ALWAYS" GridPane.hgrow="ALWAYS">
                     <children>
-                        <HBox>
+                        <HBox fx:id="detailBox">
                             <Button fx:id="back" mnemonicParsing="false"
                                     styleClass="back-btn" text="⮨" HBox.hgrow="NEVER"/>
                             <Button fx:id="fwrd" mnemonicParsing="false"

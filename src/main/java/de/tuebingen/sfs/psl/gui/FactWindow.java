@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javafx.scene.layout.HBox;
 import org.h2.util.StringUtils;
 import org.linqs.psl.model.rule.GroundRule;
 
@@ -80,6 +81,8 @@ public class FactWindow {
 	protected 	PslProblem pslProblem;
 	protected Map<String, TalkingPredicate> talkingPreds;
 	protected Map<String, TalkingRule> talkingRules;
+	@FXML
+	protected HBox detailBox;
 	@FXML
 	protected Button back;
 	@FXML
