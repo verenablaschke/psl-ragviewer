@@ -605,7 +605,7 @@ public class FactWindow {
 				explanation = String.format("%.3f: %s", entry.value, explanation);
 			}
 			TextFlow textFlow = new TextFlow();
-			AtomVerbalizationRenderer.fillTextFlow(explanation, textFlow, FactWindow.this, true);
+			AtomVerbalizationRenderer.fillTextFlow(explanation, textFlow, FactWindow.this);
 			textFlow.prefWidthProperty().bind(whyNotScrollPane.widthProperty().subtract(40));
 
 			ContextMenu menu = new ContextMenu();
@@ -624,6 +624,10 @@ public class FactWindow {
 					menu.show(textFlow, event.getScreenX(), event.getScreenY());
 				}
 			});
+
+			if (!entry.key.second) {
+				textFlow.setOpacity(0.5);
+			}
 
 			vbox.getChildren().add(textFlow);
 
@@ -663,7 +667,7 @@ public class FactWindow {
 		TalkingPredicate tPred = getTalkingPredicate(pred);
 		String verbalization = verbalizeAtom(tPred, internalForm, score);
 		atomVerbalizationPane.getChildren().clear();
-		AtomVerbalizationRenderer.fillTextFlow(verbalization, atomVerbalizationPane, this, true);
+		AtomVerbalizationRenderer.fillTextFlow(verbalization, atomVerbalizationPane, this);
 		// atomVerbalizationPane.setText("TODO: generate text based on TalkingPredicate
 		// object.");
 		setFacts(graph);
@@ -776,7 +780,7 @@ public class FactWindow {
 					String verbalization = verbalizeAtom(tPred, encoded, score);
 					atomVerbalizationPane.getChildren().clear();
 					atomVerbalizationPane.setStyle("-fx-padding: 3 0 0 0;");
-					AtomVerbalizationRenderer.fillTextFlow(verbalization, atomVerbalizationPane, getWindow(), true);
+					AtomVerbalizationRenderer.fillTextFlow(verbalization, atomVerbalizationPane, getWindow());
 				}
 
 				// listView.set .setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
