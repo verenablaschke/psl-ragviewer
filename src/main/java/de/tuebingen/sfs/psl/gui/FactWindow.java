@@ -539,26 +539,18 @@ public class FactWindow {
         double score = scoreMap.get(contextAtom);
         Double counterfactualDist = graph.getCounterfactual(contextAtom, groundingName);
         if (displayCounterfactual && (score > 0.0 || score < 1.0)) {
-            double counterfactualAtomVal = score + (whyExplanation ? -1.0 : 1.0) * RuleAtomGraph.COUNTERFACTUAL_OFFSET;
             if (counterfactualDist == null) {
-                explanation += "\n(No counterfactuals for equality groundings (yet))";
-                influence = true;
-                // TODO add one counterfactual per direction
-            } else {
-                double distDiff = counterfactualDist - dist;
-                if (showRuleVerbalization) {
-                    StringBuilder sb = new StringBuilder();
-                    // TODO talking pred!!
-                    sb.append("\nIf ").append(contextAtom).append(" had had a value of ").append(String.format("%.2f", 100 * counterfactualAtomVal));
-                    sb.append(" %, then the distance to satisfaction would have been ");
-                    sb.append(String.format("%.4f", counterfactualDist)).append(".");
-                    explanation += sb.toString();
+                double[] counterfactualDistances = rag.getCounterfactualsForEqualityRule(contextAtom, groundingName);
+                if (whyExplanation) {
+                    explanation += generateCounterfactualExplanation(counterfactualDistances[0], dist, score - RuleAtomGraph.COUNTERFACTUAL_OFFSET, contextAtom);
+                    counterfactualDist = counterfactualDistances[0];
                 } else {
-                    explanation += String.format("\n  %.4f: if score is %.2f", counterfactualDist, 100 * counterfactualAtomVal);
+                    explanation += generateCounterfactualExplanation(counterfactualDistances[1], dist, score + RuleAtomGraph.COUNTERFACTUAL_OFFSET, contextAtom);
+                    counterfactualDist = counterfactualDistances[1];
                 }
-                if (distDiff > 0.00000001) {
-                    explanation += String.format(" (%s%.8f)", distDiff >= 0 ? "+" : "-", +distDiff);
-                }
+            } else {
+                double counterfactualAtomVal = score + (whyExplanation ? -1.0 : 1.0) * RuleAtomGraph.COUNTERFACTUAL_OFFSET;
+                explanation += generateCounterfactualExplanation(counterfactualDist, dist, counterfactualAtomVal, contextAtom);
             }
         }
         if (displayDistToSatisfaction) {
@@ -567,7 +559,26 @@ public class FactWindow {
         if (counterfactualDist == null) {
             counterfactualDist = 0.0;
         }
-        return new RankingEntry<Pair<String, Boolean>>(new Pair<>(explanation, influence), dist * 10 + counterfactualDist);
+        return new RankingEntry<>(new Pair<>(explanation, influence), dist * 10 + counterfactualDist);
+    }
+
+    protected String generateCounterfactualExplanation(double counterfactualDist, double dist, double counterfactualAtomVal, String contextAtom) {
+        String counterfactualExpl = "";
+        double distDiff = counterfactualDist - dist;
+        if (showRuleVerbalization) {
+            StringBuilder sb = new StringBuilder();
+            // TODO talking pred!!
+            sb.append("\nIf ").append(contextAtom).append(" had had a value of ").append(String.format("%.2f", 100 * counterfactualAtomVal));
+            sb.append(" %, then the distance to satisfaction would have been ");
+            sb.append(String.format("%.4f", counterfactualDist)).append(".");
+            counterfactualExpl = sb.toString();
+        } else {
+            counterfactualExpl = String.format("\n  %.4f: if score is %.2f", counterfactualDist, 100 * counterfactualAtomVal);
+        }
+        if (distDiff > 0.0000001) {
+            counterfactualExpl += String.format(" (%s%.4f)", distDiff >= 0 ? "+" : "-", +distDiff);
+        }
+        return counterfactualExpl;
     }
 
     protected String generateExplanation(Map<String, TalkingRule> talkingRules, String ruleName, String groundingName,
