@@ -537,6 +537,9 @@ public class FactWindow {
         double dist = rag.distanceToSatisfaction(groundingName);
         boolean influence = rag.putsPressureOnGrounding(contextAtom, groundingName);
         double score = scoreMap.get(contextAtom);
+        if ((Math.abs(score - 1.0) < 0.0000000001 && !whyExplanation) || (Math.abs(score - 0.0) < 0.0000000001 && whyExplanation)) {
+            return new RankingEntry<>(new Pair<>(explanation, true), dist * 10);
+        }
         Double counterfactualDist = graph.getCounterfactual(contextAtom, groundingName);
         if (displayCounterfactual && (score > 0.0 || score < 1.0)) {
             if (counterfactualDist == null) {
