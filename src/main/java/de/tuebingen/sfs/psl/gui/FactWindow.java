@@ -534,30 +534,31 @@ public class FactWindow {
 	protected RankingEntry<Pair<String, Boolean>> generateWeightedExplanation(String ruleName, String groundingName,
 															   String contextAtom, RuleAtomGraph rag, boolean whyExplanation) {
 		String explanation = generateExplanation(talkingRules, ruleName, groundingName, contextAtom, rag, true);
-		double[] counterfactualValueAndDist = graph.getCounterfactual(groundingName, contextAtom);
 		double dist = rag.distanceToSatisfaction(groundingName);
-		boolean influence = Math.abs(dist - counterfactualValueAndDist[1]) >= 0.0000001;
-		if (displayCounterfactual) {
-			explanation += generateCounterfacturalExplanation(counterfactualValueAndDist, groundingName, contextAtom);
+		boolean influence = rag.putsPressureOnGrounding(contextAtom, groundingName);
+		double score = scoreMap.get(contextAtom);
+		if (displayCounterfactual && (score > 0.0 || score < 1.0)) {
+			Double counterfactualDist = graph.getCounterfactual(contextAtom, groundingName);
+			double counterfactualAtomVal = score + (whyExplanation ? -1.0 : 1.0) * RuleAtomGraph.COUNTERFACTUAL_OFFSET;
+			if (counterfactualDist == null) {
+				explanation += "\n(No counterfactuals for equality groundings (yet))";
+				influence = true;
+				// TODO add one counterfactual per direction
+			} else {
+				if (showRuleVerbalization) {
+					StringBuilder sb = new StringBuilder();
+					// TODO talking pred!!
+					sb.append("\nIf ").append(contextAtom).append(" had had a value of ")
+							.append(String.format("%.2f", 100 * counterfactualAtomVal));
+					sb.append(" %, then the distance to satisfaction would have been ");
+					sb.append(String.format("%.4f", counterfactualDist)).append(".");
+					explanation += sb.toString();
+				} else {
+					explanation += String.format("\n  %.4f: if score is %.2f", counterfactualDist, 100 * counterfactualAtomVal);
+				}
+			}
 		}
 		return new RankingEntry<Pair<String, Boolean>>(new Pair<>(explanation, influence), dist);
-	}
-
-	protected String generateCounterfacturalExplanation(double[] valueAndDist, String groundingName, String currentAtom) {
-		if (valueAndDist[0] <= 0 || valueAndDist[0] >= 1.0) {
-			return "";
-		}
-		if (showRuleVerbalization) {
-			StringBuilder sb = new StringBuilder();
-			// TODO talking pred!!
-			sb.append("\nIf ").append(currentAtom).append(" had had a value of ")
-					.append(String.format("%.2f", 100 * valueAndDist[0]));
-			sb.append("%, then the distance to satisfaction would have been ");
-			sb.append(String.format("%.3f", valueAndDist[1])).append(".");
-			return sb.toString();
-		} else {
-			return String.format("\n  %.3f: [%.2f]", valueAndDist[1], 100 * valueAndDist[0]);
-		}
 	}
 
 	protected String generateExplanation(Map<String, TalkingRule> talkingRules, String ruleName, String groundingName,
@@ -602,7 +603,7 @@ public class FactWindow {
 		for (RankingEntry<Pair<String, Boolean>> entry : entries){
 			String explanation = entry.key.first;
 			if (displayDistToSatisfaction) {
-				explanation = String.format("%.3f: %s", entry.value, explanation);
+				explanation = String.format("%.4f: %s", entry.value, explanation);
 			}
 			TextFlow textFlow = new TextFlow();
 			AtomVerbalizationRenderer.fillTextFlow(explanation, textFlow, FactWindow.this);
