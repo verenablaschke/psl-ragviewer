@@ -1,18 +1,7 @@
 package de.tuebingen.sfs.psl.gui;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -124,9 +113,7 @@ public class FactWindow {
     // Java variables
     protected Stack<String> nextAtoms;
     protected Stack<String> previousAtoms;
-    protected double xOffset = 0;
-    protected double yOffset = 0;
-    protected String activeProblem;
+    protected String activeProblem; // TODO move into EtinenFactWindow
     protected boolean presortSidebar;
     protected boolean displayDistToSatisfaction;
     protected boolean displayCounterfactual;
@@ -184,9 +171,9 @@ public class FactWindow {
         }
         System.err.println(this.talkingPreds);
 
-        this.presortSidebar = presortSidebar == null ? false : presortSidebar;
-        this.printPaneContentsToConsole = printPaneContentsToConsole == null ? false : printPaneContentsToConsole;
-        this.showOnlyRagAtoms = showOnlyRagAtoms == null ? true : showOnlyRagAtoms;
+        this.presortSidebar = presortSidebar != null && presortSidebar;
+        this.printPaneContentsToConsole = printPaneContentsToConsole != null && printPaneContentsToConsole;
+        this.showOnlyRagAtoms = showOnlyRagAtoms == null || showOnlyRagAtoms;
 
         updateAtoms();
         setRenderer(constantRenderer); // Can be null.
@@ -230,11 +217,13 @@ public class FactWindow {
         }
     }
 
+    // TODO move into EtinenFactWindow
     protected static void disableButton(Button button) {
         button.getStyleClass().add("btn-disabled");
         button.setDisable(true);
     }
 
+    // TODO move into EtinenFactWindow
     protected static void enableButton(Button button) {
         button.getStyleClass().remove("btn-disabled");
         button.setDisable(false);
@@ -397,9 +386,7 @@ public class FactWindow {
         String[] args = elems[1].substring(0, elems[1].length() - 1).split(", ");
         List<String> atomElems = new ArrayList<>(args.length + 1);
         atomElems.add(elems[0]);
-        for (String arg : args) {
-            atomElems.add(arg);
-        }
+        atomElems.addAll(Arrays.asList(args));
         return atomElems;
     }
 
@@ -444,7 +431,6 @@ public class FactWindow {
             args = atomToDisplayArguments.get(getInternalForm(atom));
             System.err.println("Encountered new atom " + atom
                     + " and updated the atom maps accordingly. (This should not have happened.)");
-            System.err.println("");
         }
         return args;
     }
@@ -476,7 +462,6 @@ public class FactWindow {
         for (RankingEntry<String> s : rag.rankGroundingsByPressure(Double.NEGATIVE_INFINITY)) {
             notUnderPressureList.add(s.key);
         }
-        Map<String, TalkingRule> talkingRules = getTalkingRules();
         String currentAtom = getInternalForm(this.currentAtom.get());
 
         List<RankingEntry<Pair<String, Boolean>>> whyRules = new ArrayList<>();
@@ -484,9 +469,9 @@ public class FactWindow {
 
         // If the atom's value wasn't inferred, we can hardcode the explanation:
         if (graph.isFixed(currentAtom)) {
-            whyRules.add(new RankingEntry<Pair<String, Boolean>>(new Pair<>("The value of this atom was fixed before the inference.", true), -1));
+            whyRules.add(new RankingEntry<>(new Pair<>("The value of this atom was fixed before the inference.", true), -1));
             setExplanationBox(whyRules, whyBox);
-            whyNotRules.add(new RankingEntry<Pair<String, Boolean>>(new Pair<>("The value of this atom was fixed before the inference.", true), -1));
+            whyNotRules.add(new RankingEntry<>(new Pair<>("The value of this atom was fixed before the inference.", true), -1));
             setExplanationBox(whyNotRules, whyNotBox);
             return;
         }
@@ -533,7 +518,7 @@ public class FactWindow {
 
     protected RankingEntry<Pair<String, Boolean>> generateWeightedExplanation(String ruleName, String groundingName,
                                                                               String contextAtom, RuleAtomGraph rag, boolean whyExplanation) {
-        String explanation = generateExplanation(talkingRules, ruleName, groundingName, contextAtom, rag, true);
+        String explanation = generateExplanation(talkingRules, ruleName, groundingName, contextAtom, rag, whyExplanation);
         double dist = rag.distanceToSatisfaction(groundingName);
         boolean influence = rag.putsPressureOnGrounding(contextAtom, groundingName);
         double score = scoreMap.get(contextAtom);
@@ -566,7 +551,7 @@ public class FactWindow {
     }
 
     protected String generateCounterfactualExplanation(double counterfactualDist, double dist, double counterfactualAtomVal, String contextAtom) {
-        String counterfactualExpl = "";
+        String counterfactualExpl;
         double distDiff = counterfactualDist - dist;
         if (showRuleVerbalization) {
             StringBuilder sb = new StringBuilder();
@@ -578,7 +563,7 @@ public class FactWindow {
         } else {
             counterfactualExpl = String.format("\n  %.4f: if score is %.2f", counterfactualDist, 100 * counterfactualAtomVal);
         }
-        if (distDiff > 0.0000001) {
+        if (Math.abs(distDiff) > 0.0000001) {
             counterfactualExpl += String.format(" (%s%.4f)", distDiff >= 0 ? "+" : "-", +distDiff);
         }
         return counterfactualExpl;
@@ -639,12 +624,7 @@ public class FactWindow {
                 content.putString(finalExplanation);
                 clipboard.setContent(content);
             });
-            textFlow.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
-                @Override
-                public void handle(ContextMenuEvent event) {
-                    menu.show(textFlow, event.getScreenX(), event.getScreenY());
-                }
-            });
+            textFlow.setOnContextMenuRequested(event -> menu.show(textFlow, event.getScreenX(), event.getScreenY()));
 
             if (!entry.key.second) {
                 textFlow.setOpacity(0.5);
@@ -707,7 +687,7 @@ public class FactWindow {
         return tPred.verbalizeIdeaAsSentence(score, args.toArray(new String[args.size()]));
     }
 
-    public class ExitHandler implements EventHandler<ActionEvent> {
+    public static class ExitHandler implements EventHandler<ActionEvent> {
         Stage stage;
 
         public ExitHandler(Stage stage) {
@@ -722,7 +702,7 @@ public class FactWindow {
 
     public class GraphTask extends Task<RuleAtomGraph> {
         @Override
-        protected RuleAtomGraph call() throws Exception {
+        protected RuleAtomGraph call() {
             return getRag();
         }
     }
@@ -733,7 +713,7 @@ public class FactWindow {
 
     public class ScoreTask extends Task<Map<String, Double>> {
         @Override
-        protected Map<String, Double> call() throws Exception {
+        protected Map<String, Double> call() {
             return getScoreMap();
         }
     }
@@ -745,7 +725,6 @@ public class FactWindow {
     public class ScoreService extends javafx.concurrent.Service<Map<String, Double>> {
         ScoreTask task;
         int boxInd;
-        boolean tr;
         int ordinal;
 
         public Task<Map<String, Double>> createTask() {
@@ -764,8 +743,7 @@ public class FactWindow {
                     onFormSelection(currentAtom.get(), false);
                 }
                 String firstSelected = "";
-                Set<String> sidebarAtoms = new TreeSet<>();
-                sidebarAtoms.addAll(ragAtoms);
+                Set<String> sidebarAtoms = new TreeSet<>(ragAtoms);
                 sidebarAtoms.removeAll(nonpersistedAtoms);
                 if (!showOnlyRagAtoms)
                     sidebarAtoms.addAll(scoreMapAtoms);
@@ -806,7 +784,7 @@ public class FactWindow {
 
                 // listView.set .setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
                 // FOR the morpheme tabs, also copy the methods
-                displayedAtomsListView.setCellFactory(param -> new ListCell<String>() {
+                displayedAtomsListView.setCellFactory(param -> new ListCell<>() {
                     @Override
                     protected void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -855,9 +833,9 @@ public class FactWindow {
                     }
 
                     @Override
-                    public void updateSelected(boolean arg0) {
-                        super.updateSelected(arg0);
-                        if (arg0 == true) {
+                    public void updateSelected(boolean selected) {
+                        super.updateSelected(selected);
+                        if (selected) {
                             getStyleClass().remove("lw-cell-no-border");
                             getStyleClass().add("lw-cell-border");
                         } else {
@@ -868,16 +846,12 @@ public class FactWindow {
                 });
 
                 displayedAtomsListView.getSelectionModel().selectedItemProperty()
-                        .addListener(new ChangeListener<String>() {
-                            @Override
-                            public void changed(ObservableValue<? extends String> observable, String oldValue,
-                                                String newValue) {
-                                if (selectedItemStage != null) {
-                                    selectedItemStage.close();
-                                }
-                                if (newValue != null) {
-                                    onFormSelection(newValue);
-                                }
+                        .addListener((observable, oldValue, newValue) -> {
+                            if (selectedItemStage != null) {
+                                selectedItemStage.close();
+                            }
+                            if (newValue != null) {
+                                onFormSelection(newValue);
                             }
                         });
 
@@ -896,9 +870,7 @@ public class FactWindow {
 
                 // Initial "not sorted" comparator
                 Comparator<String> nullComparator = Comparator.comparing(String::toString);
-                Comparator<String> comparator = Comparator.comparing(String::toString, (f1, f2) -> {
-                    return getScore(f1).compareTo(getScore(f2));
-                });
+                Comparator<String> comparator = Comparator.comparing(String::toString, (f1, f2) -> getScore(f1).compareTo(getScore(f2)));
 
                 // Mouse events for clicking the sorting symbol
                 sortLabel.setOnMouseClicked((MouseEvent event) -> {
@@ -935,109 +907,101 @@ public class FactWindow {
                 // Initial set-up.
                 ComboBox<String> predNameBox = new ComboBox<>();
                 predNameBox.setPrefWidth(Double.MAX_VALUE);
-                SortedSet<String> sortedPredNames = new TreeSet<String>(
-                        displayedAtoms.stream().map(el -> getPredicate(el)).sorted().collect(Collectors.toSet()));
+                SortedSet<String> sortedPredNames = displayedAtoms.stream().map(FactWindow.this::getPredicate).sorted().collect(Collectors.toCollection(TreeSet::new));
                 predNameBox.getItems().add(""); // default value
                 predNameBox.getItems().addAll(sortedPredNames);
                 // cb.setEditable(true);
                 atomFilter.add(predNameBox, 0, 0);
 
-                predNameBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-                    public void changed(ObservableValue<? extends String> observable, String oldValue,
-                                        String newValue) {
-                        // Filter by predicate.
-                        if (newValue == null || newValue.length() == 0 || newValue.isEmpty()) {
-                            filteredData.setPredicate(s -> true);
+                predNameBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                    // Filter by predicate.
+                    if (newValue == null || newValue.isEmpty()) {
+                        filteredData.setPredicate(s -> true);
+                    } else {
+                        filteredData.setPredicate(s -> getPredicate(s).equals(newValue));
+                    }
+
+                    // If a predicate name has been selected,
+                    // infer the number of args from the filtered list of atoms.
+                    int argNum = 0;
+                    if (!filteredData.isEmpty() && predNameBox.getSelectionModel().getSelectedItem() != null
+                            && !predNameBox.getSelectionModel().getSelectedItem().isEmpty()) {
+                        argNum = getDisplayArguments(filteredData.get(0)).size();
+                    }
+
+                    // Add the predNameBox again.
+                    atomFilter.getChildren().clear();
+                    double percentages = 100.0 / (argNum + 1);
+                    atomFilter.getColumnConstraints().clear();
+                    for (int i = 0; i < argNum + 1; i++) {
+                        ColumnConstraints cc1 = new ColumnConstraints();
+                        cc1.setPercentWidth(percentages);
+                        atomFilter.getColumnConstraints().add(cc1);
+                    }
+                    atomFilter.add(predNameBox, 0, 0);
+
+                    // Add all applicable argument boxes.
+                    boxInd = 0;
+                    List<ComboBox<String>> predArgBoxes = new ArrayList<>();
+                    for (int i = 0; i < argNum; i++) {
+                        boxInd = i + 1;
+                        ComboBox<String> predArgBox = new ComboBox<>();
+                        predArgBoxes.add(predArgBox);
+                        predArgBox.setPrefWidth(Double.MAX_VALUE);
+                        atomFilter.add(predArgBox, boxInd, 0);
+
+                        // Figure out the possible values and sort them.
+                        boolean isNumeric = true;
+                        SortedSet<String> argValues = filteredData.stream()
+                                .map(a -> getDisplayArguments(a).get(boxInd - 1)).collect(Collectors.toCollection(TreeSet::new));
+                        for (String s : argValues) {
+                            if (!StringUtils.isNumber(s)) {
+                                isNumeric = false;
+                                break;
+                            }
+                        }
+                        predArgBox.getItems().add(""); // default value
+                        if (isNumeric) {
+                            SortedSet<Integer> argValuesInts = argValues.stream().map(Integer::parseInt).collect(Collectors.toCollection(TreeSet::new));
+                            for (Integer o : argValuesInts) {
+                                predArgBox.getItems().add(o + "");
+                            }
                         } else {
-                            filteredData.setPredicate(s -> getPredicate(s).equals(newValue));
+                            predArgBox.getItems().addAll(argValues);
                         }
+                    }
 
-                        // If a predicate name has been selected,
-                        // infer the number of args from the filtered list of atoms.
-                        int argNum = 0;
-                        if (!filteredData.isEmpty() && predNameBox.getSelectionModel().getSelectedItem() != null
-                                && !predNameBox.getSelectionModel().getSelectedItem().isEmpty()) {
-                            argNum = getDisplayArguments(filteredData.get(0)).size();
-                        }
-
-                        // Add the predNameBox again.
-                        atomFilter.getChildren().clear();
-                        double percentages = 100 / (argNum + 1);
-                        atomFilter.getColumnConstraints().clear();
-                        for (int i = 0; i < argNum + 1; i++) {
-                            ColumnConstraints cc1 = new ColumnConstraints();
-                            cc1.setPercentWidth(percentages);
-                            atomFilter.getColumnConstraints().add(cc1);
-                        }
-                        atomFilter.add(predNameBox, 0, 0);
-
-                        // Add all applicable argument boxes.
-                        boxInd = 0;
-                        List<ComboBox<String>> predArgBoxes = new ArrayList<>();
-                        for (int i = 0; i < argNum; i++) {
-                            boxInd = i + 1;
-                            ComboBox<String> predArgBox = new ComboBox<>();
-                            predArgBoxes.add(predArgBox);
-                            predArgBox.setPrefWidth(Double.MAX_VALUE);
-                            atomFilter.add(predArgBox, boxInd, 0);
-
-                            // Figure out the possible values and sort them.
-                            boolean isNumeric = true;
-                            SortedSet<String> argValues = new TreeSet<String>(filteredData.stream()
-                                    .map(a -> getDisplayArguments(a).get(boxInd - 1)).collect(Collectors.toSet()));
-                            for (String s : argValues) {
-                                if (!StringUtils.isNumber(s)) {
-                                    isNumeric = false;
-                                    break;
-                                }
-                            }
-                            predArgBox.getItems().add(""); // default value
-                            if (isNumeric) {
-                                SortedSet<Integer> argValuesInts = new TreeSet<Integer>(
-                                        argValues.stream().map(a -> Integer.parseInt(a)).collect(Collectors.toSet()));
-                                for (Integer o : argValuesInts) {
-                                    predArgBox.getItems().add(o + "");
-                                }
-                            } else {
-                                predArgBox.getItems().addAll(argValues);
-                            }
-                        }
-
-                        // Filter by argument(s).
-                        for (ComboBox<String> predArgBox : predArgBoxes) {
-                            predArgBox.getSelectionModel().selectedItemProperty()
-                                    .addListener(new ChangeListener<String>() {
-                                        public void changed(ObservableValue<? extends String> observable,
-                                                            String oldValue, String newValue) {
-                                            Map<Integer, String> selectedArguments = new HashMap<>();
-                                            for (ComboBox<String> combo2 : predArgBoxes) {
-                                                if (combo2.getSelectionModel().getSelectedItem() != null
-                                                        && !combo2.getSelectionModel().getSelectedItem().isEmpty()) {
-                                                    selectedArguments.put(predArgBoxes.indexOf(combo2),
-                                                            combo2.getSelectionModel().getSelectedItem());
-                                                } else {
-                                                    selectedArguments.remove(predArgBoxes.indexOf(combo2));
-                                                }
-                                            }
-                                            filteredData.setPredicate(item -> {
-                                                // Check the predicate name first, then the arguments.
-                                                if (!getPredicate(item).startsWith(
-                                                        predNameBox.getSelectionModel().getSelectedItem())) {
-                                                    return false;
-                                                }
-                                                for (Map.Entry<Integer, String> selected : selectedArguments
-                                                        .entrySet()) {
-                                                    if (!getDisplayArguments(item).get(selected.getKey())
-                                                            .equals(selected.getValue())) {
-                                                        return false;
-                                                    }
-                                                }
-                                                return true;
-                                            });
-
+                    // Filter by argument(s).
+                    for (ComboBox<String> predArgBox : predArgBoxes) {
+                        predArgBox.getSelectionModel().selectedItemProperty()
+                                .addListener((observable1, oldValue1, newValue1) -> {
+                                    Map<Integer, String> selectedArguments = new HashMap<>();
+                                    for (ComboBox<String> combo2 : predArgBoxes) {
+                                        if (combo2.getSelectionModel().getSelectedItem() != null
+                                                && !combo2.getSelectionModel().getSelectedItem().isEmpty()) {
+                                            selectedArguments.put(predArgBoxes.indexOf(combo2),
+                                                    combo2.getSelectionModel().getSelectedItem());
+                                        } else {
+                                            selectedArguments.remove(predArgBoxes.indexOf(combo2));
                                         }
+                                    }
+                                    filteredData.setPredicate(item -> {
+                                        // Check the predicate name first, then the arguments.
+                                        if (!getPredicate(item).startsWith(
+                                                predNameBox.getSelectionModel().getSelectedItem())) {
+                                            return false;
+                                        }
+                                        for (Map.Entry<Integer, String> selected : selectedArguments
+                                                .entrySet()) {
+                                            if (!getDisplayArguments(item).get(selected.getKey())
+                                                    .equals(selected.getValue())) {
+                                                return false;
+                                            }
+                                        }
+                                        return true;
                                     });
-                        }
+
+                                });
                     }
                 });
 
@@ -1071,7 +1035,7 @@ public class FactWindow {
         }
     }
 
-    public class Pair<T, U> {
+    public static class Pair<T, U> {
         public T first;
         public U second;
 
@@ -1089,8 +1053,7 @@ public class FactWindow {
         }
 
         public boolean equals(Object o) {
-            if (o instanceof Pair<?, ?>) {
-                Pair<?, ?> otherPair = (Pair<?, ?>) o;
+            if (o instanceof Pair<?, ?> otherPair) {
                 return (otherPair.first.equals(first) && otherPair.second.equals(second));
             }
             return false;
