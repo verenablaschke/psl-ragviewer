@@ -589,7 +589,14 @@ public class FactWindow {
                     }
                     String atom = pred + "(" + de.tuebingen.sfs.psl.util.data.StringUtils.join(args, ", ") + ")";
                     sb.append("\\url[").append(getDisplayForm(atom)).append("]{");
-                    sb.append(atom).append("}");
+                    sb.append(atom).append("} [");
+                    Double belief = scoreMap.get(atom);
+                    if (belief == null) {
+                        sb.append("???");
+                    } else {
+                        sb.append("%.2f".formatted(belief));
+                    }
+                    sb.append("] ");
                 } else {
                     sb.append(element);
                 }
