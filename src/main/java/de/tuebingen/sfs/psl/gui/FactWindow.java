@@ -490,7 +490,7 @@ public class FactWindow {
                         currentAtomIndex = i;
                 }
                 String status = atomToStatus.get(currentAtomIndex).get(1);
-                if (status.equals("+")) {
+                if (rag.isEqualityRule(rule) || status.equals("+")) {
                     whyRules.add(generateWeightedExplanation(ruleName, rule, currentAtom, rag, true));
                 }
                 if (rag.isEqualityRule(rule) || status.equals("-")) {
