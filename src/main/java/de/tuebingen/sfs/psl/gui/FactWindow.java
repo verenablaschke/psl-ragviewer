@@ -229,6 +229,7 @@ public class FactWindow {
     }
 
     public Set<String> setRenderer(ConstantRenderer constantRenderer) {
+        System.err.println("@@@@ " + constantRenderer); // TODO del
         this.constantRenderer = constantRenderer;
         atomToPredicate = new TreeMap<>();
         atomToDisplayArguments = new TreeMap<>();
@@ -260,14 +261,20 @@ public class FactWindow {
         TalkingPredicate pred = getTalkingPredicate(atomElems.get(0));
         String surface = atom;
         List<String> args = atomElems.subList(1, atomElems.size());
+        System.err.println(pred + " -- " + atomElems.get(0) + " -- " + atomElems); // TODO del
         if (constantRenderer != null && pred != null) {
-            args = pred.retrieveArguments(constantRenderer, args.toArray(new String[atomElems.size() - 1]));
+            args = retrievePredArgs(pred, args, atomElems);
             surface = atomElems.get(0) + "(" + String.join(", ", args) + ")";
+            System.err.println("0000 " + surface); // TODO del
         }
         encodedAtomToSurface.put(atom, surface);
         surfaceAtomToEncoded.put(surface, atom);
         atomToPredicate.put(atom, atomElems.get(0));
         atomToDisplayArguments.put(atom, args);
+    }
+
+    protected List<String> retrievePredArgs(TalkingPredicate pred, List<String> args, List<String> atomElems) {
+        return pred.retrieveArguments(constantRenderer, args.toArray(new String[atomElems.size() - 1]));
     }
 
     public void update(String atom) {

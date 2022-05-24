@@ -16,8 +16,8 @@ import javafx.stage.Stage;
 
 public class StandaloneFactWindowLauncher extends Application {
     protected static ConstantRenderer renderer = null;
-    protected static PslProblem pslProblem;
-    protected static RuleAtomGraph rag;
+    protected static PslProblem pslProblem = null;
+    protected static RuleAtomGraph rag = null;
     protected static Map<String, Double> result;
     protected static FactWindow fWindow = null;
     protected static Stage selectedItemStage = null;
@@ -65,8 +65,10 @@ public class StandaloneFactWindowLauncher extends Application {
                                       boolean printPaneContentsToConsole) {
         renderer = constantRenderer;
         pslProblem = pslProb;
-        rag = inferenceResult.getRag();
-        result = inferenceResult.getInferenceValues();
+        if (inferenceResult != null) {
+            rag = inferenceResult.getRag();
+            result = inferenceResult.getInferenceValues();
+        }
         sortSidebar = sortSidebarDesc;
         printExplanationPanesToConsole = printPaneContentsToConsole;
         new Thread() {
@@ -94,14 +96,14 @@ public class StandaloneFactWindowLauncher extends Application {
         if (fWindow == null) {
             fWindow = createFactWindow();
         }
-        FXMLLoader fWindowloader = new FXMLLoader(getClass().getResource("/FactWindow.fxml"));
+        FXMLLoader fWindowloader = new FXMLLoader(getClass().getResource("/fx/FactWindow.fxml"));
         fWindowloader.setController(fWindow);
         fWindow.setStage(selectedItemStage);
         fWindowloader.load();
         Parent fWindowParent = fWindowloader.getRoot();
         Scene fWindowScene = new Scene(fWindowParent);
         fWindowScene.getStylesheets()
-                .add(getClass().getResource("/facts.css").toExternalForm());
+                .add(getClass().getResource("/fx/facts.css").toExternalForm());
         selectedItemStage.setScene(fWindowScene);
         selectedItemStage.setTitle("Inference results");
         selectedItemStage.show();
