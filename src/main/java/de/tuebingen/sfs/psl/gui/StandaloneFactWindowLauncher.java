@@ -15,93 +15,101 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class StandaloneFactWindowLauncher extends Application {
-	protected static ConstantRenderer renderer = null;
-	protected static PslProblem pslProblem;
-	protected static RuleAtomGraph rag;
-	protected static Map<String, Double> result;
-	protected static boolean sortSidebar = false;
-	protected static boolean printExplanationPanesToConsole = false;
-	protected static Map<String, TalkingPredicate> talkingPreds = null;
-	protected static Map<String, TalkingRule> talkingRules = null;
+    protected static ConstantRenderer renderer = null;
+    protected static PslProblem pslProblem;
+    protected static RuleAtomGraph rag;
+    protected static Map<String, Double> result;
+    protected static FactWindow fWindow = null;
+    protected static Stage selectedItemStage = null;
+    protected static boolean sortSidebar = false;
+    protected static boolean printExplanationPanesToConsole = false;
+    protected static Map<String, TalkingPredicate> talkingPreds = null;
+    protected static Map<String, TalkingRule> talkingRules = null;
 
-	public static void launchWithData(PslProblem pslProb, RuleAtomGraph graph, Map<String, Double> valueMap) {
-		pslProblem = pslProb;
-		rag = graph;
-		result = valueMap;
-		new Thread() {
-			@Override
-			public void run() {
-				javafx.application.Application.launch(StandaloneFactWindowLauncher.class);
-			}
-		}.start();
-	}
+    public static void launchWithData(PslProblem pslProb, RuleAtomGraph graph, Map<String, Double> valueMap) {
+        pslProblem = pslProb;
+        rag = graph;
+        result = valueMap;
+        new Thread() {
+            @Override
+            public void run() {
+                javafx.application.Application.launch(StandaloneFactWindowLauncher.class);
+            }
+        }.start();
+    }
 
-	public static void launchWithData(InferenceResult inferenceResult, Map<String, TalkingPredicate> talkingPredsMap,
-			Map<String, TalkingRule> talkingRulesMap, boolean sortSidebarDesc, boolean printPaneContentsToConsole) {
-		talkingPreds = talkingPredsMap;
-		talkingRules = talkingRulesMap;
-		rag = inferenceResult.getRag();
-		result = inferenceResult.getInferenceValues();
-		sortSidebar = sortSidebarDesc;
-		printExplanationPanesToConsole = printPaneContentsToConsole;
-		new Thread() {
-			@Override
-			public void run() {
-				javafx.application.Application.launch(StandaloneFactWindowLauncher.class);
-			}
-		}.start();
-	}
+    public static void launchWithData(InferenceResult inferenceResult, Map<String, TalkingPredicate> talkingPredsMap,
+                                      Map<String, TalkingRule> talkingRulesMap, boolean sortSidebarDesc,
+                                      boolean printPaneContentsToConsole) {
+        talkingPreds = talkingPredsMap;
+        talkingRules = talkingRulesMap;
+        rag = inferenceResult.getRag();
+        result = inferenceResult.getInferenceValues();
+        sortSidebar = sortSidebarDesc;
+        printExplanationPanesToConsole = printPaneContentsToConsole;
+        new Thread() {
+            @Override
+            public void run() {
+                javafx.application.Application.launch(StandaloneFactWindowLauncher.class);
+            }
+        }.start();
+    }
 
-	public static void launchWithData(InferenceResult inferenceResult, Map<String, TalkingPredicate> talkingPredsMap,
-			Map<String, TalkingRule> talkingRulesMap) {
-		launchWithData(inferenceResult, talkingPredsMap, talkingRulesMap, true, false);
-	}
+    public static void launchWithData(InferenceResult inferenceResult, Map<String, TalkingPredicate> talkingPredsMap,
+                                      Map<String, TalkingRule> talkingRulesMap) {
+        launchWithData(inferenceResult, talkingPredsMap, talkingRulesMap, true, false);
+    }
 
-	public static void launchWithData(ConstantRenderer constantRenderer, PslProblem pslProb,
-			InferenceResult inferenceResult, boolean sortSidebarDesc, boolean printPaneContentsToConsole) {
-		renderer = constantRenderer;
-		pslProblem = pslProb;
-		rag = inferenceResult.getRag();
-		result = inferenceResult.getInferenceValues();
-		sortSidebar = sortSidebarDesc;
-		printExplanationPanesToConsole = printPaneContentsToConsole;
-		new Thread() {
-			@Override
-			public void run() {
-				javafx.application.Application.launch(StandaloneFactWindowLauncher.class);
-			}
-		}.start();
-	}
+    public static void launchWithData(ConstantRenderer constantRenderer, PslProblem pslProb,
+                                      InferenceResult inferenceResult, boolean sortSidebarDesc,
+                                      boolean printPaneContentsToConsole) {
+        renderer = constantRenderer;
+        pslProblem = pslProb;
+        rag = inferenceResult.getRag();
+        result = inferenceResult.getInferenceValues();
+        sortSidebar = sortSidebarDesc;
+        printExplanationPanesToConsole = printPaneContentsToConsole;
+        new Thread() {
+            @Override
+            public void run() {
+                javafx.application.Application.launch(StandaloneFactWindowLauncher.class);
+            }
+        }.start();
+    }
 
-	public static void launchWithData(PslProblem pslProb, InferenceResult inferenceResult) {
-		launchWithData(null, pslProb, inferenceResult);
-	}
+    public static void launchWithData(PslProblem pslProb, InferenceResult inferenceResult) {
+        launchWithData(null, pslProb, inferenceResult);
+    }
 
-	public static void launchWithData(ConstantRenderer constantRenderer, PslProblem pslProb,
-			InferenceResult inferenceResult) {
-		launchWithData(constantRenderer, pslProb, inferenceResult, true, false);
-	}
+    public static void launchWithData(ConstantRenderer constantRenderer, PslProblem pslProb,
+                                      InferenceResult inferenceResult) {
+        launchWithData(constantRenderer, pslProb, inferenceResult, true, false);
+    }
 
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		Stage selectedItemStage = new Stage();
-		FactWindow fWindow = createFactWindow();
-		FXMLLoader fWindowloader = new FXMLLoader(getClass().getResource("/FactWindow.fxml"));
-		fWindowloader.setController(fWindow);
-		fWindow.setStage(selectedItemStage);
-		fWindowloader.load();
-		Parent fWindowParent = fWindowloader.getRoot();
-		Scene fWindowScene = new Scene(fWindowParent);
-		fWindowScene.getStylesheets()
-				.add(getClass().getResource("/facts.css").toExternalForm());
-		selectedItemStage.setScene(fWindowScene);
-		selectedItemStage.setTitle("Inference results");
-		selectedItemStage.show();
-	}
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        if (selectedItemStage == null) {
+            selectedItemStage = new Stage();
+        }
+        if (fWindow == null) {
+            fWindow = createFactWindow();
+        }
+        FXMLLoader fWindowloader = new FXMLLoader(getClass().getResource("/FactWindow.fxml"));
+        fWindowloader.setController(fWindow);
+        fWindow.setStage(selectedItemStage);
+        fWindowloader.load();
+        Parent fWindowParent = fWindowloader.getRoot();
+        Scene fWindowScene = new Scene(fWindowParent);
+        fWindowScene.getStylesheets()
+                .add(getClass().getResource("/facts.css").toExternalForm());
+        selectedItemStage.setScene(fWindowScene);
+        selectedItemStage.setTitle("Inference results");
+        selectedItemStage.show();
+    }
 
-	public FactWindow createFactWindow() {
-		return new FactWindow(renderer, pslProblem, null, rag, result, talkingPreds, talkingRules,
-				sortSidebar, printExplanationPanesToConsole, null);
-	}
+    public FactWindow createFactWindow() {
+        return new FactWindow(renderer, pslProblem, null, rag, result, talkingPreds, talkingRules,
+                sortSidebar, printExplanationPanesToConsole, null);
+    }
 
 }

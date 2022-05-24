@@ -114,7 +114,6 @@ public class FactWindow {
     // Java variables
     protected Stack<String> nextAtoms;
     protected Stack<String> previousAtoms;
-    protected String activeProblem; // TODO move into EtinenFactWindow
     protected boolean presortSidebar;
     protected boolean displayDistToSatisfaction;
     protected boolean displayCounterfactual;
@@ -216,18 +215,6 @@ public class FactWindow {
                     baseColor.getLuminance() + (float) (toneForAtom * (100 - baseColor.getLuminance())));
             return ColorUtils.colorHTML(resultColor);
         }
-    }
-
-    // TODO move into EtinenFactWindow
-    protected static void disableButton(Button button) {
-        button.getStyleClass().add("btn-disabled");
-        button.setDisable(true);
-    }
-
-    // TODO move into EtinenFactWindow
-    protected static void enableButton(Button button) {
-        button.getStyleClass().remove("btn-disabled");
-        button.setDisable(false);
     }
 
     protected void updateAtoms() {
