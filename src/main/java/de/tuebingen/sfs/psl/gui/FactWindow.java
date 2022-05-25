@@ -606,8 +606,6 @@ public class FactWindow {
             return sb.toString();
         }
 
-        if (constantRenderer == null)
-            return talkingRules.get(ruleName).generateExplanation(groundingName, contextAtom, rag, whyExplanation);
         return talkingRules.get(ruleName).generateExplanation(constantRenderer, groundingName, contextAtom, rag,
                 whyExplanation);
     }
