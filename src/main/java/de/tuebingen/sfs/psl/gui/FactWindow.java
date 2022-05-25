@@ -44,6 +44,7 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import org.h2.util.StringUtils;
 import org.linqs.psl.model.rule.GroundRule;
+import org.linqs.psl.model.rule.Rule;
 
 import java.awt.*;
 import java.util.List;
@@ -64,6 +65,7 @@ public class FactWindow {
     protected Set<String> nonpersistedAtoms;
     protected boolean reloadingSidebar = false;
     protected PslProblem pslProblem;
+    protected Map<Rule, String> ruleToName = new HashMap<>();
     protected Map<String, TalkingPredicate> talkingPreds;
     protected Map<String, TalkingRule> talkingRules;
     @FXML
@@ -152,14 +154,13 @@ public class FactWindow {
     // - RagViewer: graph, scoreMap, talkingPreds, talkingRules
     protected FactWindow(ConstantRenderer constantRenderer, PslProblem pslProblem, String atomName, RuleAtomGraph graph,
                          Map<String, Double> scoreMap, Map<String, TalkingPredicate> talkingPreds,
-                         Map<String, TalkingRule> talkingRules, Boolean presortSidebar, Boolean printPaneContentsToConsole,
-                         Boolean showOnlyRagAtoms) {
+                         Map<String, TalkingRule> talkingRules, Boolean presortSidebar,
+                         Boolean printPaneContentsToConsole, Boolean showOnlyRagAtoms) {
         this.pslProblem = pslProblem; // Can be null.
         this.graph = graph;
         this.scoreMap = scoreMap;
 
-        if (atomName == null)
-            atomName = "";
+        if (atomName == null) atomName = "";
         atomToPredicate = null;
 
         if (pslProblem == null) {
@@ -168,6 +169,9 @@ public class FactWindow {
         } else {
             this.talkingPreds = pslProblem.getTalkingPredicates();
             this.talkingRules = pslProblem.getTalkingRules();
+            for (TalkingRule rule : this.talkingRules.values()) {
+                ruleToName.put(rule.getRule(), rule.getName());
+            }
         }
         System.err.println(this.talkingPreds);
 
@@ -182,14 +186,11 @@ public class FactWindow {
 
     public static double getToneForAtom(String atomRepresentation, Map<String, Double> scoreMap) {
         // System.err.println("getToneForAtom(" + atomRepresentation + ")");
-        if (scoreMap == null)
-            return 0.0;
+        if (scoreMap == null) return 0.0;
         else {
             Double alpha = scoreMap.get(atomRepresentation);
-            if (alpha == null)
-                return 0.0;
-            if (alpha >= 0 && alpha <= 1)
-                return 1.0 - alpha;
+            if (alpha == null) return 0.0;
+            if (alpha >= 0 && alpha <= 1) return 1.0 - alpha;
             return alpha;
         }
 
@@ -229,7 +230,6 @@ public class FactWindow {
     }
 
     public Set<String> setRenderer(ConstantRenderer constantRenderer) {
-        System.err.println("@@@@ " + constantRenderer); // TODO del
         this.constantRenderer = constantRenderer;
         atomToPredicate = new TreeMap<>();
         atomToDisplayArguments = new TreeMap<>();
@@ -261,20 +261,14 @@ public class FactWindow {
         TalkingPredicate pred = getTalkingPredicate(atomElems.get(0));
         String surface = atom;
         List<String> args = atomElems.subList(1, atomElems.size());
-        System.err.println(pred + " -- " + atomElems.get(0) + " -- " + atomElems); // TODO del
         if (constantRenderer != null && pred != null) {
-            args = retrievePredArgs(pred, args, atomElems);
+            args = pred.retrieveArguments(constantRenderer, args.toArray(new String[atomElems.size() - 1]));
             surface = atomElems.get(0) + "(" + String.join(", ", args) + ")";
-            System.err.println("0000 " + surface); // TODO del
         }
         encodedAtomToSurface.put(atom, surface);
         surfaceAtomToEncoded.put(surface, atom);
         atomToPredicate.put(atom, atomElems.get(0));
         atomToDisplayArguments.put(atom, args);
-    }
-
-    protected List<String> retrievePredArgs(TalkingPredicate pred, List<String> args, List<String> atomElems) {
-        return pred.retrieveArguments(constantRenderer, args.toArray(new String[atomElems.size() - 1]));
     }
 
     public void update(String atom) {
@@ -352,9 +346,9 @@ public class FactWindow {
         });
 
         // Set various display possibilities for atom belief
-        beliefValueLabel.textProperty().bind(Bindings.when(currentAtom.isEmpty()).then("")
-                .otherwise(Bindings.when(currentScore.greaterThan(1.0)).then("+")
-                        .otherwise(Bindings.when(currentScore.lessThan(0.0)).then("-")
+        beliefValueLabel.textProperty().bind(Bindings.when(currentAtom.isEmpty()).then("").otherwise(
+                Bindings.when(currentScore.greaterThan(1.0)).then("+").otherwise(
+                        Bindings.when(currentScore.lessThan(0.0)).then("-")
                                 .otherwise(Bindings.format(Locale.ENGLISH, "%.2f %%", currentScore.multiply(100))))));
 
     }
@@ -365,14 +359,12 @@ public class FactWindow {
 
     protected TalkingPredicate getTalkingPredicate(String predicateName) {
         String encoded = getInternalForm(predicateName);
-        if (pslProblem != null)
-            return pslProblem.getTalkingPredicates().get(encoded);
+        if (pslProblem != null) return pslProblem.getTalkingPredicates().get(encoded);
         return talkingPreds.get(encoded);
     }
 
     protected Map<String, TalkingRule> getTalkingRules() {
-        if (pslProblem != null)
-            return pslProblem.getTalkingRules();
+        if (pslProblem != null) return pslProblem.getTalkingRules();
         return talkingRules;
     }
 
@@ -405,10 +397,8 @@ public class FactWindow {
     }
 
     protected void setCurrentAtom(String atom) {
-        if (atom == null || atom.isEmpty())
-            currentAtom.set("");
-        else
-            currentAtom.set(getDisplayForm(atom));
+        if (atom == null || atom.isEmpty()) currentAtom.set("");
+        else currentAtom.set(getDisplayForm(atom));
     }
 
     protected Double getScore(String atom) {
@@ -424,8 +414,8 @@ public class FactWindow {
         if (args == null) {
             processAtom(atom);
             args = atomToDisplayArguments.get(getInternalForm(atom));
-            System.err.println("Encountered new atom " + atom
-                    + " and updated the atom maps accordingly. (This should not have happened.)");
+            System.err.println("Encountered new atom " + atom +
+                    " and updated the atom maps accordingly. (This should not have happened.)");
         }
         return args;
     }
@@ -435,8 +425,8 @@ public class FactWindow {
         if (pred == null) {
             processAtom(atom);
             pred = atomToPredicate.get(getInternalForm(atom));
-            System.err.println("Encountered new atom " + atom
-                    + " and updated the atom maps accordingly. (This should not have happened.)");
+            System.err.println("Encountered new atom " + atom +
+                    " and updated the atom maps accordingly. (This should not have happened.)");
         }
         return pred;
     }
@@ -464,9 +454,11 @@ public class FactWindow {
 
         // If the atom's value wasn't inferred, we can hardcode the explanation:
         if (graph.isFixed(currentAtom)) {
-            whyRules.add(new RankingEntry<>(new Pair<>("The value of this atom was fixed before the inference.", true), -1));
+            whyRules.add(
+                    new RankingEntry<>(new Pair<>("The value of this atom was fixed before the inference.", true), -1));
             setExplanationBox(whyRules, whyBox);
-            whyNotRules.add(new RankingEntry<>(new Pair<>("The value of this atom was fixed before the inference.", true), -1));
+            whyNotRules.add(
+                    new RankingEntry<>(new Pair<>("The value of this atom was fixed before the inference.", true), -1));
             setExplanationBox(whyNotRules, whyNotBox);
             return;
         }
@@ -480,8 +472,7 @@ public class FactWindow {
                 int currentAtomIndex = -1;
                 for (int i = 0; i < groundAtoms.length; i++) {
                     groundAtoms[i] = atomToStatus.get(i).get(0);
-                    if (groundAtoms[i].equals(currentAtom))
-                        currentAtomIndex = i;
+                    if (groundAtoms[i].equals(currentAtom)) currentAtomIndex = i;
                 }
                 String status = atomToStatus.get(currentAtomIndex).get(1);
                 if (rag.isEqualityRule(rule) || status.equals("+")) {
@@ -512,12 +503,15 @@ public class FactWindow {
     }
 
     protected RankingEntry<Pair<String, Boolean>> generateWeightedExplanation(String ruleName, String groundingName,
-                                                                              String contextAtom, RuleAtomGraph rag, boolean whyExplanation) {
-        String explanation = generateExplanation(talkingRules, ruleName, groundingName, contextAtom, rag, whyExplanation);
+                                                                              String contextAtom, RuleAtomGraph rag,
+                                                                              boolean whyExplanation) {
+        String explanation = generateExplanation(talkingRules, ruleName, groundingName, contextAtom, rag,
+                whyExplanation);
         double dist = rag.distanceToSatisfaction(groundingName);
         boolean influence = rag.putsPressureOnGrounding(contextAtom, groundingName);
         double score = scoreMap.get(contextAtom);
-        if ((Math.abs(score - 1.0) < 0.0000000001 && !whyExplanation) || (Math.abs(score - 0.0) < 0.0000000001 && whyExplanation)) {
+        if ((Math.abs(score - 1.0) < 0.0000000001 && !whyExplanation) ||
+                (Math.abs(score - 0.0) < 0.0000000001 && whyExplanation)) {
             return new RankingEntry<>(new Pair<>(explanation, true), dist * 10);
         }
         Double counterfactualDist = graph.getCounterfactual(contextAtom, groundingName);
@@ -525,15 +519,19 @@ public class FactWindow {
             if (counterfactualDist == null) {
                 double[] counterfactualDistances = rag.getCounterfactualsForEqualityRule(contextAtom, groundingName);
                 if (whyExplanation) {
-                    explanation += generateCounterfactualExplanation(counterfactualDistances[0], dist, score - RuleAtomGraph.COUNTERFACTUAL_OFFSET, contextAtom);
+                    explanation += generateCounterfactualExplanation(counterfactualDistances[0], dist,
+                            score - RuleAtomGraph.COUNTERFACTUAL_OFFSET, contextAtom);
                     counterfactualDist = counterfactualDistances[0];
                 } else {
-                    explanation += generateCounterfactualExplanation(counterfactualDistances[1], dist, score + RuleAtomGraph.COUNTERFACTUAL_OFFSET, contextAtom);
+                    explanation += generateCounterfactualExplanation(counterfactualDistances[1], dist,
+                            score + RuleAtomGraph.COUNTERFACTUAL_OFFSET, contextAtom);
                     counterfactualDist = counterfactualDistances[1];
                 }
             } else {
-                double counterfactualAtomVal = score + (whyExplanation ? -1.0 : 1.0) * RuleAtomGraph.COUNTERFACTUAL_OFFSET;
-                explanation += generateCounterfactualExplanation(counterfactualDist, dist, counterfactualAtomVal, contextAtom);
+                double counterfactualAtomVal =
+                        score + (whyExplanation ? -1.0 : 1.0) * RuleAtomGraph.COUNTERFACTUAL_OFFSET;
+                explanation += generateCounterfactualExplanation(counterfactualDist, dist, counterfactualAtomVal,
+                        contextAtom);
             }
         }
         if (displayDistToSatisfaction) {
@@ -545,18 +543,21 @@ public class FactWindow {
         return new RankingEntry<>(new Pair<>(explanation, influence), dist * 10 + counterfactualDist);
     }
 
-    protected String generateCounterfactualExplanation(double counterfactualDist, double dist, double counterfactualAtomVal, String contextAtom) {
+    protected String generateCounterfactualExplanation(double counterfactualDist, double dist,
+                                                       double counterfactualAtomVal, String contextAtom) {
         String counterfactualExpl;
         double distDiff = counterfactualDist - dist;
         if (showRuleVerbalization) {
             StringBuilder sb = new StringBuilder();
             // TODO talking pred!!
-            sb.append("\nIf ").append(contextAtom).append(" had had a value of ").append(String.format("%.2f", 100 * counterfactualAtomVal));
+            sb.append("\nIf ").append(contextAtom).append(" had had a value of ")
+                    .append(String.format("%.2f", 100 * counterfactualAtomVal));
             sb.append(" %, then the distance to satisfaction would have been ");
             sb.append(String.format("%.4f", counterfactualDist)).append(".");
             counterfactualExpl = sb.toString();
         } else {
-            counterfactualExpl = String.format("\n  %.4f: if score is %.2f", counterfactualDist, 100 * counterfactualAtomVal);
+            counterfactualExpl = String.format("\n  %.4f: if score is %.2f", counterfactualDist,
+                    100 * counterfactualAtomVal);
         }
         if (Math.abs(distDiff) > 0.0000001) {
             counterfactualExpl += String.format(" (%s%.4f)", distDiff >= 0 ? "+" : "-", +distDiff);
@@ -564,12 +565,17 @@ public class FactWindow {
         return counterfactualExpl;
     }
 
+    protected String getNameForRule(Rule rule) {
+        if (pslProblem != null) return pslProblem.getNameForRule(rule);
+        return ruleToName.getOrDefault(rule, "<missing rule name>");
+    }
+
     protected String generateExplanation(Map<String, TalkingRule> talkingRules, String ruleName, String groundingName,
                                          String contextAtom, RuleAtomGraph rag, boolean whyExplanation) {
         if (!showRuleVerbalization) {
             StringBuilder sb = new StringBuilder();
             GroundRule rule = graph.getRuleForGrounding(groundingName);
-            sb.append(pslProblem.getNameForRule(rule.getRule())).append(": ");
+            sb.append(getNameForRule(rule.getRule())).append(": ");
             String ruleStr = rule.toString().replaceAll("', '", "','");
             for (String element : ruleStr.split("\\s+")) {
                 Matcher matcher = ATOM_START_PATTERN.matcher(element);
@@ -596,8 +602,7 @@ public class FactWindow {
                 }
                 sb.append(" ");
             }
-            if (sb.length() > 0)
-                sb.deleteCharAt(sb.length() - 1);
+            if (sb.length() > 0) sb.deleteCharAt(sb.length() - 1);
             return sb.toString();
         }
 
@@ -678,15 +683,14 @@ public class FactWindow {
     }
 
     protected String verbalizeAtom(TalkingPredicate tPred, String internalForm, Double score) {
-        if (internalForm.isEmpty())
-            return "";
+        if (internalForm.isEmpty()) return "";
         if (constantRenderer != null) {
             List<String> args = getAtomElements(internalForm);
             args = args.subList(1, args.size());
             return tPred.verbalizeIdeaAsSentence(constantRenderer, score, args.toArray(new String[args.size()]));
         }
         List<String> args = getDisplayArguments(internalForm);
-        return tPred.verbalizeIdeaAsSentence(score, args.toArray(new String[args.size()]));
+        return tPred.verbalizeIdeaAsSentence(constantRenderer, score, args.toArray(new String[args.size()]));
     }
 
     public static class ExitHandler implements EventHandler<ActionEvent> {
@@ -747,8 +751,7 @@ public class FactWindow {
                 String firstSelected = "";
                 Set<String> sidebarAtoms = new TreeSet<>(ragAtoms);
                 sidebarAtoms.removeAll(nonpersistedAtoms);
-                if (!showOnlyRagAtoms)
-                    sidebarAtoms.addAll(scoreMapAtoms);
+                if (!showOnlyRagAtoms) sidebarAtoms.addAll(scoreMapAtoms);
                 for (String atom : sidebarAtoms) {
                     if (!graph.renderAtomInGui(atom)) {
                         continue;
@@ -759,8 +762,7 @@ public class FactWindow {
                     }
                     displayedAtoms.add(atom);
                 }
-                if (reloadingSidebar)
-                    firstSelected = currentAtom.get();
+                if (reloadingSidebar) firstSelected = currentAtom.get();
 
                 // listView.setPrefHeight(Double.MAX_VALUE);
                 FilteredList<String> filteredData = new FilteredList<>(displayedAtoms, s -> true);
@@ -802,9 +804,8 @@ public class FactWindow {
                                 String backgroundColor;
                                 if (!showOnlyRagAtoms && unusedAtoms.contains(encoded))
                                     backgroundColor = "#bebebe"; // grey
-                                else
-                                    backgroundColor = getBackgroundColorForScore(
-                                            graph.atomToBaseColor(encoded, deleted), scoreMap, encoded);
+                                else backgroundColor = getBackgroundColorForScore(
+                                        graph.atomToBaseColor(encoded, deleted), scoreMap, encoded);
                                 setStyle("-fx-background-color:" + backgroundColor + ";");
                                 getStyleClass().remove("white-font");
                                 getStyleClass().add("black-font");
@@ -817,8 +818,7 @@ public class FactWindow {
                                     getStyleClass().add("white-font");
                                 }
                                 String displayForm = getDisplayForm(item);
-                                if (priorApplied(encoded))
-                                    displayForm = "(+) " + displayForm;
+                                if (priorApplied(encoded)) displayForm = "(+) " + displayForm;
                                 setText(displayForm);
                                 Label fixedRep = new Label();
                                 if (graph.isFixed(encoded)) {
@@ -857,8 +857,7 @@ public class FactWindow {
                             }
                         });
 
-                ImageView sortIcon = new ImageView(
-                        new Image(getClass().getResource("/sort.png").toExternalForm()));
+                ImageView sortIcon = new ImageView(new Image(getClass().getResource("/sort.png").toExternalForm()));
                 ImageView sortIconUp = new ImageView(
                         new Image(getClass().getResource("/sort-up.png").toExternalForm()));
                 ImageView sortIconDown = new ImageView(
@@ -872,7 +871,8 @@ public class FactWindow {
 
                 // Initial "not sorted" comparator
                 Comparator<String> nullComparator = Comparator.comparing(String::toString);
-                Comparator<String> comparator = Comparator.comparing(String::toString, (f1, f2) -> getScore(f1).compareTo(getScore(f2)));
+                Comparator<String> comparator = Comparator.comparing(String::toString,
+                        (f1, f2) -> getScore(f1).compareTo(getScore(f2)));
 
                 // Mouse events for clicking the sorting symbol
                 sortLabel.setOnMouseClicked((MouseEvent event) -> {
@@ -909,7 +909,8 @@ public class FactWindow {
                 // Initial set-up.
                 ComboBox<String> predNameBox = new ComboBox<>();
                 predNameBox.setPrefWidth(Double.MAX_VALUE);
-                SortedSet<String> sortedPredNames = displayedAtoms.stream().map(FactWindow.this::getPredicate).sorted().collect(Collectors.toCollection(TreeSet::new));
+                SortedSet<String> sortedPredNames = displayedAtoms.stream().map(FactWindow.this::getPredicate).sorted()
+                        .collect(Collectors.toCollection(TreeSet::new));
                 predNameBox.getItems().add(""); // default value
                 predNameBox.getItems().addAll(sortedPredNames);
                 // cb.setEditable(true);
@@ -926,8 +927,8 @@ public class FactWindow {
                     // If a predicate name has been selected,
                     // infer the number of args from the filtered list of atoms.
                     int argNum = 0;
-                    if (!filteredData.isEmpty() && predNameBox.getSelectionModel().getSelectedItem() != null
-                            && !predNameBox.getSelectionModel().getSelectedItem().isEmpty()) {
+                    if (!filteredData.isEmpty() && predNameBox.getSelectionModel().getSelectedItem() != null &&
+                            !predNameBox.getSelectionModel().getSelectedItem().isEmpty()) {
                         argNum = getDisplayArguments(filteredData.get(0)).size();
                     }
 
@@ -955,7 +956,8 @@ public class FactWindow {
                         // Figure out the possible values and sort them.
                         boolean isNumeric = true;
                         SortedSet<String> argValues = filteredData.stream()
-                                .map(a -> getDisplayArguments(a).get(boxInd - 1)).collect(Collectors.toCollection(TreeSet::new));
+                                .map(a -> getDisplayArguments(a).get(boxInd - 1))
+                                .collect(Collectors.toCollection(TreeSet::new));
                         for (String s : argValues) {
                             if (!StringUtils.isNumber(s)) {
                                 isNumeric = false;
@@ -964,7 +966,8 @@ public class FactWindow {
                         }
                         predArgBox.getItems().add(""); // default value
                         if (isNumeric) {
-                            SortedSet<Integer> argValuesInts = argValues.stream().map(Integer::parseInt).collect(Collectors.toCollection(TreeSet::new));
+                            SortedSet<Integer> argValuesInts = argValues.stream().map(Integer::parseInt)
+                                    .collect(Collectors.toCollection(TreeSet::new));
                             for (Integer o : argValuesInts) {
                                 predArgBox.getItems().add(o + "");
                             }
@@ -979,8 +982,8 @@ public class FactWindow {
                                 .addListener((observable1, oldValue1, newValue1) -> {
                                     Map<Integer, String> selectedArguments = new HashMap<>();
                                     for (ComboBox<String> combo2 : predArgBoxes) {
-                                        if (combo2.getSelectionModel().getSelectedItem() != null
-                                                && !combo2.getSelectionModel().getSelectedItem().isEmpty()) {
+                                        if (combo2.getSelectionModel().getSelectedItem() != null &&
+                                                !combo2.getSelectionModel().getSelectedItem().isEmpty()) {
                                             selectedArguments.put(predArgBoxes.indexOf(combo2),
                                                     combo2.getSelectionModel().getSelectedItem());
                                         } else {
@@ -993,8 +996,7 @@ public class FactWindow {
                                                 predNameBox.getSelectionModel().getSelectedItem())) {
                                             return false;
                                         }
-                                        for (Map.Entry<Integer, String> selected : selectedArguments
-                                                .entrySet()) {
+                                        for (Map.Entry<Integer, String> selected : selectedArguments.entrySet()) {
                                             if (!getDisplayArguments(item).get(selected.getKey())
                                                     .equals(selected.getValue())) {
                                                 return false;
