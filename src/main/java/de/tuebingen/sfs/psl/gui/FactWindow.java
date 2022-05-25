@@ -674,8 +674,6 @@ public class FactWindow {
         String verbalization = verbalizeAtom(tPred, internalForm, score);
         atomVerbalizationPane.getChildren().clear();
         AtomVerbalizationRenderer.fillTextFlow(verbalization, atomVerbalizationPane, this);
-        // atomVerbalizationPane.setText("TODO: generate text based on TalkingPredicate
-        // object.");
         setFacts(graph);
         return internalForm;
     }
