@@ -3,6 +3,7 @@ package de.tuebingen.sfs.psl.gui;
 import de.tuebingen.sfs.psl.engine.PslProblem;
 import de.tuebingen.sfs.psl.engine.RuleAtomGraph;
 import de.tuebingen.sfs.psl.talk.ConstantRenderer;
+import de.tuebingen.sfs.psl.talk.TalkingConstraint;
 import de.tuebingen.sfs.psl.talk.TalkingPredicate;
 import de.tuebingen.sfs.psl.talk.TalkingRuleOrConstraint;
 import de.tuebingen.sfs.psl.util.color.ColorUtils;
@@ -143,8 +144,8 @@ public class FactWindow {
     }
 
     public FactWindow(ConstantRenderer renderer, RuleAtomGraph rag, Map<String, TalkingPredicate> talkingPreds,
-                      Map<String, TalkingRuleOrConstraint> talkingRules, Map<String, Double> result, boolean presortSidebar,
-                      boolean printPaneContentsToConsole) {
+                      Map<String, TalkingRuleOrConstraint> talkingRules, Map<String, Double> result,
+                      boolean presortSidebar, boolean printPaneContentsToConsole) {
         this(renderer, null, null, rag, result, talkingPreds, talkingRules, presortSidebar, printPaneContentsToConsole,
                 null);
     }
@@ -449,8 +450,8 @@ public class FactWindow {
         }
         String currentAtom = getInternalForm(this.currentAtom.get());
 
-        List<RankingEntry<Pair<String, Boolean>>> whyRules = new ArrayList<>();
-        List<RankingEntry<Pair<String, Boolean>>> whyNotRules = new ArrayList<>();
+        List<Explanation> whyRules = new ArrayList<>();
+        List<Explanation> whyNotRules = new ArrayList<>();
 
         // If the atom's value wasn't inferred, we can hardcode the explanation:
         boolean canHaveWhyInfluence = true;
@@ -458,19 +459,15 @@ public class FactWindow {
         if (graph.isFixed(currentAtom)) {
             canHaveWhyInfluence = false;
             canHaveWhyNotInfluence = false;
-            whyRules.add(new RankingEntry<>(new Pair<>("The value of this atom was fixed before the inference.", true),
-                    1000));
+            whyRules.add(Explanation.createFixedExplanation("The value of this atom was fixed before the inference."));
             whyNotRules.add(
-                    new RankingEntry<>(new Pair<>("The value of this atom was fixed before the inference.", true),
-                            1000));
+                    Explanation.createFixedExplanation("The value of this atom was fixed before the inference."));
         } else if (Math.abs(currentScore.get()) < 0.00001) {
             canHaveWhyInfluence = false;
-            whyRules.add(
-                    new RankingEntry<>(new Pair<>("This atom has taken the lowest value it can take.", true), 1000));
+            whyRules.add(Explanation.createFixedExplanation("This atom has taken the lowest value it can take."));
         } else if (Math.abs(currentScore.get() - 1) < 0.00001) {
             canHaveWhyNotInfluence = false;
-            whyNotRules.add(
-                    new RankingEntry<>(new Pair<>("This atom has taken the highest value it can take.", true), 1000));
+            whyNotRules.add(Explanation.createFixedExplanation("This atom has taken the highest value it can take."));
         }
 
         for (Tuple tup : rag.getOutgoingLinks(currentAtom)) {
@@ -514,14 +511,20 @@ public class FactWindow {
         }
     }
 
-    protected RankingEntry<Pair<String, Boolean>> generateWeightedExplanation(String ruleName, String groundingName,
-                                                                              String contextAtom, RuleAtomGraph rag,
-                                                                              boolean whyExplanation,
-                                                                              boolean canHaveInfluence) {
-        String explanation = generateExplanation(talkingRules, ruleName, groundingName, contextAtom, rag,
-                whyExplanation);
+    protected Explanation generateWeightedExplanation(String ruleName, String groundingName, String contextAtom,
+                                                      RuleAtomGraph rag, boolean whyExplanation,
+                                                      boolean canHaveInfluence) {
+        String text = generateExplanation(talkingRules, ruleName, groundingName, contextAtom, rag, whyExplanation);
         double dist = rag.distanceToSatisfaction(groundingName);
-        boolean influence = canHaveInfluence && rag.putsPressureOnGrounding(contextAtom, groundingName);
+        boolean active = canHaveInfluence && rag.putsPressureOnGrounding(contextAtom, groundingName);
+
+        Explanation expl;
+        if (talkingRules.get(ruleName) instanceof TalkingConstraint) {
+            expl = Explanation.createConstraintExplanation(text, dist, active);
+        } else {
+            expl = Explanation.createRuleExplanation(text, dist, active);
+        }
+
         double score = scoreMap.get(contextAtom);
         Double counterfactualDist = null;
         if (!(Math.abs(score - 1.0) < 0.00001 && !whyExplanation) && !(Math.abs(score) < 0.00001 && whyExplanation)) {
@@ -531,52 +534,43 @@ public class FactWindow {
                     double[] counterfactualDistances = rag.getCounterfactualsForEqualityRule(contextAtom,
                             groundingName);
                     if (whyExplanation) {
-                        explanation += generateCounterfactualExplanation(counterfactualDistances[0], dist,
+                        generateCounterfactualExplanation(expl, counterfactualDistances[0], dist,
                                 score - RuleAtomGraph.COUNTERFACTUAL_OFFSET, contextAtom);
-                        counterfactualDist = counterfactualDistances[0];
                     } else {
-                        explanation += generateCounterfactualExplanation(counterfactualDistances[1], dist,
+                        generateCounterfactualExplanation(expl, counterfactualDistances[1], dist,
                                 score + RuleAtomGraph.COUNTERFACTUAL_OFFSET, contextAtom);
-                        counterfactualDist = counterfactualDistances[1];
                     }
                 } else {
                     double counterfactualAtomVal =
                             score + (whyExplanation ? -1.0 : 1.0) * RuleAtomGraph.COUNTERFACTUAL_OFFSET;
-                    explanation += generateCounterfactualExplanation(counterfactualDist, dist, counterfactualAtomVal,
+                    generateCounterfactualExplanation(expl, counterfactualDist, dist, counterfactualAtomVal,
                             contextAtom);
                 }
             }
         }
-        if (displayDistToSatisfaction) {
-            explanation = String.format("%.4f: %s", dist, explanation);
-        }
-        if (counterfactualDist == null) {
-            counterfactualDist = 0.0;
-        }
-        return new RankingEntry<>(new Pair<>(explanation, influence),
-                dist * 100 + counterfactualDist * 10 + (canHaveInfluence ? 1 : 0));
+        return expl;
     }
 
-    protected String generateCounterfactualExplanation(double counterfactualDist, double dist,
-                                                       double counterfactualAtomVal, String contextAtom) {
-        String counterfactualExpl;
-        double distDiff = counterfactualDist - dist;
+    protected void generateCounterfactualExplanation(Explanation expl, double counterfactualDist, double dist,
+                                                     double counterfactualAtomVal, String contextAtom) {
+        expl.setCounterfactualDissatisfaction(counterfactualDist);
+        StringBuilder sb = new StringBuilder("\n");
         if (showRuleVerbalization) {
-            StringBuilder sb = new StringBuilder();
-            // TODO talking pred!!
-            sb.append("\nIf ").append(contextAtom).append(" had had a value of ")
+            sb.append("If ").append(contextAtom).append(" had had a value of ")
                     .append(String.format("%.2f", 100 * counterfactualAtomVal));
             sb.append(" %, then the distance to satisfaction would have been ");
-            sb.append(String.format("%.4f", counterfactualDist)).append(".");
-            counterfactualExpl = sb.toString();
+            sb.append(expl.getDisplayableCounterfactualDissatisfaction()).append(".");
         } else {
-            counterfactualExpl = String.format("\n  %.4f: if score is %.2f", counterfactualDist,
-                    100 * counterfactualAtomVal);
+            sb.append("  ").append(expl.getDisplayableCounterfactualDissatisfaction());
+            sb.append(String.format(": if score were %.2f", counterfactualDist, 100 * counterfactualAtomVal));
         }
-        if (Math.abs(distDiff) > 0.0000001) {
-            counterfactualExpl += String.format(" (%s%.4f)", distDiff >= 0 ? "+" : "-", +distDiff);
+        if (!expl.isConstraint()) {
+            double distDiff = counterfactualDist - dist;
+            if (Math.abs(distDiff) > 0.0000001) {
+                sb.append(String.format(" (%s%.4f)", distDiff >= 0 ? "+" : "-", distDiff));
+            }
         }
-        return counterfactualExpl;
+        expl.setText(expl.getText() + sb.toString());
     }
 
     protected String getNameForRule(Rule rule) {
@@ -584,8 +578,9 @@ public class FactWindow {
         return ruleToName.getOrDefault(rule, "<missing rule name>");
     }
 
-    protected String generateExplanation(Map<String, TalkingRuleOrConstraint> talkingRules, String ruleName, String groundingName,
-                                         String contextAtom, RuleAtomGraph rag, boolean whyExplanation) {
+    protected String generateExplanation(Map<String, TalkingRuleOrConstraint> talkingRules, String ruleName,
+                                         String groundingName, String contextAtom, RuleAtomGraph rag,
+                                         boolean whyExplanation) {
         if (!showRuleVerbalization) {
             StringBuilder sb = new StringBuilder();
             GroundRule rule = graph.getRuleForGrounding(groundingName);
@@ -624,11 +619,16 @@ public class FactWindow {
                 .generateExplanation(constantRenderer, groundingName, contextAtom, rag, whyExplanation);
     }
 
-    protected void setExplanationBox(List<RankingEntry<Pair<String, Boolean>>> entries, VBox vbox) {
+    protected void setExplanationBox(List<Explanation> entries, VBox vbox) {
         vbox.getChildren().clear();
-        Collections.sort(entries, Collections.reverseOrder());
-        for (RankingEntry<Pair<String, Boolean>> entry : entries) {
-            String explanation = entry.key.first;
+        Collections.sort(entries);
+        for (Explanation entry : entries) {
+            String explanation = entry.getText();
+            if (displayDistToSatisfaction && !entry.isFixed()) {
+                explanation = entry.getDisplayableDissatisfaction() + ": " + explanation;
+            }
+//            explanation = entry.getSummary() + explanation;
+
             TextFlow textFlow = new TextFlow();
             AtomVerbalizationRenderer.fillTextFlow(explanation, textFlow, FactWindow.this);
             textFlow.prefWidthProperty().bind(whyNotScrollPane.widthProperty().subtract(40));
@@ -645,7 +645,7 @@ public class FactWindow {
             });
             textFlow.setOnContextMenuRequested(event -> menu.show(textFlow, event.getScreenX(), event.getScreenY()));
 
-            if (!entry.key.second) {
+            if (!entry.isActive()) {
                 textFlow.setOpacity(0.5);
             }
 
