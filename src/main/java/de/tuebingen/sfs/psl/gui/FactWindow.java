@@ -562,8 +562,8 @@ public class FactWindow {
         StringBuilder sb = new StringBuilder("\n");
         if (showRuleVerbalization) {
             sb.append("If ").append(contextAtom).append(" had had a value of ")
-                    .append(String.format(SCORE_FORMAT, 100 * counterfactualAtomVal));
-            sb.append(" %, then the distance to satisfaction would have been ");
+                    .append(String.format(SCORE_PERCENTAGE_FORMAT, 100 * counterfactualAtomVal));
+            sb.append(", then the distance to satisfaction would have been ");
             sb.append(expl.getDisplayableCounterfactualDissatisfaction()).append(".");
         } else {
             sb.append("  ").append(expl.getDisplayableCounterfactualDissatisfaction());
@@ -643,6 +643,11 @@ public class FactWindow {
                 explanation = entry.getDisplayableDissatisfaction() + ": " + explanation;
             }
 //            explanation = entry.getSummary() + explanation;
+            if (entry.isConstraint()) {
+                explanation = "⬛ " + explanation;
+            } else if (!entry.isFixed()) {
+                explanation = "⬜ " + explanation;
+            }
 
             TextFlow textFlow = new TextFlow();
             AtomVerbalizationRenderer.fillTextFlow(explanation, textFlow, FactWindow.this);
