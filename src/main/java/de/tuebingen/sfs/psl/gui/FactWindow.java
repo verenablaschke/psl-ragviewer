@@ -63,7 +63,7 @@ public class FactWindow {
     protected Set<String> ragAtoms;
     protected Set<String> scoreMapAtoms;
     protected Set<String> unusedAtoms;
-    protected Set<String> nonpersistedAtoms;
+    protected Set<String> uninterestingAtoms;
     protected boolean reloadingSidebar = false;
     protected PslProblem pslProblem;
     protected Map<Rule, String> ruleToName = new HashMap<>();
@@ -225,9 +225,11 @@ public class FactWindow {
         unusedAtoms = new TreeSet<>();
         unusedAtoms.addAll(scoreMapAtoms);
         unusedAtoms.removeAll(ragAtoms);
-        nonpersistedAtoms = new TreeSet<>();
-        nonpersistedAtoms.addAll(ragAtoms);
-        nonpersistedAtoms.removeAll(scoreMapAtoms);
+        unusedAtoms.addAll(graph.getRagFilter().getHiddenAtoms());
+        uninterestingAtoms = new TreeSet<>();
+        uninterestingAtoms.addAll(ragAtoms);
+        uninterestingAtoms.removeAll(scoreMapAtoms);
+        uninterestingAtoms.addAll(graph.getRagFilter().getHiddenAtoms());
     }
 
     public Set<String> setRenderer(ConstantRenderer constantRenderer) {
@@ -760,7 +762,7 @@ public class FactWindow {
                 }
                 String firstSelected = "";
                 Set<String> sidebarAtoms = new TreeSet<>(ragAtoms);
-                sidebarAtoms.removeAll(nonpersistedAtoms);
+                sidebarAtoms.removeAll(uninterestingAtoms);
                 if (!showOnlyRagAtoms) sidebarAtoms.addAll(scoreMapAtoms);
                 for (String atom : sidebarAtoms) {
                     if (!graph.renderAtomInGui(atom)) {
