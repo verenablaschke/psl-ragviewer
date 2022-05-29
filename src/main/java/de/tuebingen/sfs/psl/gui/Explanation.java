@@ -1,5 +1,7 @@
 package de.tuebingen.sfs.psl.gui;
 
+import de.tuebingen.sfs.psl.engine.RuleAtomGraph;
+
 public class Explanation implements Comparable<Explanation> {
 
     private String text;
@@ -51,33 +53,39 @@ public class Explanation implements Comparable<Explanation> {
     }
 
     boolean isViolatedConstraint() {
-        return isConstraint && dissatisfaction > 0.00001;
+        return isConstraint && isDissatisfied();
     }
 
     boolean isViolatedCounterfactualConstraint() {
-        return isConstraint && counterfactualDissatisfaction > 0.00001;
+        return isConstraint && counterfactualIsDissatisfied();
+    }
+
+    boolean isDissatisfied() {
+        return dissatisfaction > RuleAtomGraph.DISSATISFACTION_PRECISION;
+    }
+
+    boolean counterfactualIsDissatisfied() {
+        return counterfactualDissatisfaction > RuleAtomGraph.DISSATISFACTION_PRECISION;
     }
 
     public String getDisplayableDissatisfaction() {
         if (isConstraint) {
             if (isViolatedConstraint()) {
-//                return "∞";
-                return String.format("∞ [%.4f]", dissatisfaction);
+                return "∞ [" + String.format(FactWindow.SCORE_FORMAT, dissatisfaction) + "]";
             }
-            return "0.0000";
+            return String.format(FactWindow.SCORE_FORMAT, 0.0);
         }
-        return String.format("%.4f", dissatisfaction);
+        return String.format(FactWindow.SCORE_FORMAT, dissatisfaction);
     }
 
     public String getDisplayableCounterfactualDissatisfaction() {
         if (isConstraint) {
             if (isViolatedCounterfactualConstraint()) {
-//                return "∞";
-                return String.format("∞ [%.4f]", counterfactualDissatisfaction);
+                return "∞ [" + String.format(FactWindow.SCORE_FORMAT, counterfactualDissatisfaction) + "]";
             }
-            return "0.0000";
+            return String.format(FactWindow.SCORE_FORMAT, 0.0);
         }
-        return String.format("%.4f", counterfactualDissatisfaction);
+        return String.format(FactWindow.SCORE_FORMAT, counterfactualDissatisfaction);
     }
 
     public boolean isActive() {
@@ -92,12 +100,11 @@ public class Explanation implements Comparable<Explanation> {
             sb.append("RULE");
         }
         sb.append(" / ");
-        if (dissatisfaction > 0.00001) {
-            sb.append(" ");
+        if (isDissatisfied()) {
             sb.append("DIS");
         }
         sb.append("SATISFIED / COUNTERFACTUAL ");
-        if (counterfactualDissatisfaction > 0.00001) {
+        if (counterfactualIsDissatisfied()) {
             sb.append("DIS");
         }
         sb.append("SATISFIED ");
@@ -127,7 +134,7 @@ public class Explanation implements Comparable<Explanation> {
             return -1;
         }
         // 3. Dissatisfied rules, ordered by distance to satisfaction
-        if (!isConstraint && dissatisfaction > 0) {
+        if (!isConstraint && isDissatisfied()) {
             if (!other.isConstraint) {
                 return Double.compare(dissatisfaction, other.dissatisfaction);
             }
@@ -144,7 +151,7 @@ public class Explanation implements Comparable<Explanation> {
         }
         // 5. Rules that would be dissatisfied in a counterfactual scenario,
         // ordered by counterfactual distance to satisfaction
-        if (!isConstraint && counterfactualDissatisfaction > 0) {
+        if (!isConstraint && counterfactualIsDissatisfied()) {
             if (!other.isConstraint) {
                 return Double.compare(counterfactualDissatisfaction, other.counterfactualDissatisfaction);
             }

@@ -57,6 +57,8 @@ import java.util.stream.Collectors;
 public class FactWindow {
 
     protected static final Pattern ATOM_START_PATTERN = Pattern.compile("\\w{4,}\\(");
+    public static final String SCORE_FORMAT = "%.2f";
+    public static final String SCORE_PERCENTAGE_FORMAT = "%.0f %%";
     // Display choices
     protected boolean showOnlyRagAtoms;
     protected boolean showRuleVerbalization = true;
@@ -352,7 +354,7 @@ public class FactWindow {
         beliefValueLabel.textProperty().bind(Bindings.when(currentAtom.isEmpty()).then("").otherwise(
                 Bindings.when(currentScore.greaterThan(1.0)).then("+").otherwise(
                         Bindings.when(currentScore.lessThan(0.0)).then("-")
-                                .otherwise(Bindings.format(Locale.ENGLISH, "%.2f %%", currentScore.multiply(100))))));
+                                .otherwise(Bindings.format(Locale.ENGLISH, SCORE_PERCENTAGE_FORMAT, currentScore.multiply(100))))));
 
     }
 
@@ -464,10 +466,10 @@ public class FactWindow {
             whyRules.add(Explanation.createFixedExplanation("The value of this atom was fixed before the inference."));
             whyNotRules.add(
                     Explanation.createFixedExplanation("The value of this atom was fixed before the inference."));
-        } else if (Math.abs(currentScore.get()) < 0.00001) {
+        } else if (Math.abs(currentScore.get()) < RuleAtomGraph.DISSATISFACTION_PRECISION) {
             canHaveWhyInfluence = false;
             whyRules.add(Explanation.createFixedExplanation("This atom has taken the lowest value it can take."));
-        } else if (Math.abs(currentScore.get() - 1) < 0.00001) {
+        } else if (Math.abs(currentScore.get() - 1) < RuleAtomGraph.DISSATISFACTION_PRECISION) {
             canHaveWhyNotInfluence = false;
             whyNotRules.add(Explanation.createFixedExplanation("This atom has taken the highest value it can take."));
         }
@@ -529,7 +531,8 @@ public class FactWindow {
 
         double score = scoreMap.get(contextAtom);
         Double counterfactualDist = null;
-        if (!(Math.abs(score - 1.0) < 0.00001 && !whyExplanation) && !(Math.abs(score) < 0.00001 && whyExplanation)) {
+        if (!(Math.abs(score - 1.0) < RuleAtomGraph.DISSATISFACTION_PRECISION && !whyExplanation) &&
+                !(Math.abs(score) < RuleAtomGraph.DISSATISFACTION_PRECISION && whyExplanation)) {
             counterfactualDist = graph.getCounterfactual(contextAtom, groundingName);
             if (displayCounterfactual && (score > 0.0 || score < 1.0)) {
                 if (counterfactualDist == null) {
@@ -559,17 +562,23 @@ public class FactWindow {
         StringBuilder sb = new StringBuilder("\n");
         if (showRuleVerbalization) {
             sb.append("If ").append(contextAtom).append(" had had a value of ")
-                    .append(String.format("%.2f", 100 * counterfactualAtomVal));
+                    .append(String.format(SCORE_FORMAT, 100 * counterfactualAtomVal));
             sb.append(" %, then the distance to satisfaction would have been ");
             sb.append(expl.getDisplayableCounterfactualDissatisfaction()).append(".");
         } else {
             sb.append("  ").append(expl.getDisplayableCounterfactualDissatisfaction());
-            sb.append(String.format(": if score were %.2f", counterfactualDist, 100 * counterfactualAtomVal));
+            sb.append(": if score were ");
+            sb.append(String.format(SCORE_FORMAT, counterfactualAtomVal));
         }
         if (!expl.isConstraint()) {
             double distDiff = counterfactualDist - dist;
-            if (Math.abs(distDiff) > 0.0000001) {
-                sb.append(String.format(" (%s%.4f)", distDiff >= 0 ? "+" : "-", distDiff));
+            if (Math.abs(distDiff) > RuleAtomGraph.DISSATISFACTION_PRECISION) {
+                sb.append(" (");
+                if (distDiff > 0) {
+                    sb.append("+");
+                }
+                sb.append(String.format(SCORE_FORMAT, distDiff));
+                sb.append(")");
             }
         }
         expl.setText(expl.getText() + sb.toString());
@@ -605,7 +614,7 @@ public class FactWindow {
                     if (belief == null) {
                         sb.append("???");
                     } else {
-                        sb.append("%.2f".formatted(belief));
+                        sb.append(SCORE_FORMAT.formatted(belief));
                     }
                     sb.append("] ");
                 } else {
