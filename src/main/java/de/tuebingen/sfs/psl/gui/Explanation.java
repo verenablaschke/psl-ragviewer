@@ -15,6 +15,7 @@ public class Explanation implements Comparable<Explanation> {
         Explanation expl = new Explanation();
         expl.text = text;
         expl.isFixed = true;
+        expl.active = true;
         return expl;
     }
 
@@ -94,6 +95,9 @@ public class Explanation implements Comparable<Explanation> {
 
     public String getSummary() {
         StringBuilder sb = new StringBuilder();
+        if (isFixed) {
+            sb.append("FIXED ");
+        }
         if (isConstraint) {
             sb.append("CONSTRAINT");
         } else {
@@ -111,57 +115,40 @@ public class Explanation implements Comparable<Explanation> {
         return sb.toString();
     }
 
+    private int comparisonScore() {
+        if (isFixed) {
+            return -10;
+        }
+        if (isViolatedConstraint()) {
+            return -9;
+        }
+        if (!isConstraint && isDissatisfied()) {
+            return -8;
+        }
+        if (isViolatedCounterfactualConstraint()) {
+            return -7;
+        }
+        if (!isConstraint && counterfactualIsDissatisfied()) {
+            return -6;
+        }
+        if (isConstraint) {
+            if (active) {
+                return -5;
+            }
+            return -4;
+        }
+        if (active) {
+            return -3;
+        }
+        return 0;
+    }
+
     @Override
     public int compareTo(Explanation other) {
         if (other == null) {
             return -1;
         }
-        // Ranking:
-        // 1. Fixed explanations like
-        // "This atom's belief value cannot be higher because it already has the highest possible score (1.0)"
-        // or "The value of this atom was fixed before the inference."
-        if (isFixed && !other.isFixed) {
-            return -1;
-        }
-        // 2. Violated constraints
-        if (isViolatedConstraint()) {
-            if (!other.isConstraint) {
-                return -1;
-            }
-            if (other.isViolatedConstraint()) {
-                return 0;
-            }
-            return -1;
-        }
-        // 3. Dissatisfied rules, ordered by distance to satisfaction
-        if (!isConstraint && isDissatisfied()) {
-            if (!other.isConstraint) {
-                return Double.compare(dissatisfaction, other.dissatisfaction);
-            }
-        }
-        // 4. Constraints that would be violated in a counterfactual scenario
-        if (isViolatedCounterfactualConstraint()) {
-            if (!other.isConstraint) {
-                return -1;
-            }
-            if (other.isViolatedCounterfactualConstraint()) {
-                return 0;
-            }
-            return -1;
-        }
-        // 5. Rules that would be dissatisfied in a counterfactual scenario,
-        // ordered by counterfactual distance to satisfaction
-        if (!isConstraint && counterfactualIsDissatisfied()) {
-            if (!other.isConstraint) {
-                return Double.compare(counterfactualDissatisfaction, other.counterfactualDissatisfaction);
-            }
-        }
-        // 6. All remaining constraints
-        if (isConstraint) {
-            return other.isConstraint ? 0 : -1;
-        }
-        // 7. All remaining rules
-        return other.isConstraint ? 1 : 0;
+        return Integer.compare(comparisonScore(), other.comparisonScore());
     }
 
 
