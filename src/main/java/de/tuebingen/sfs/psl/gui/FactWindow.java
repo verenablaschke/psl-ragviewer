@@ -4,7 +4,7 @@ import de.tuebingen.sfs.psl.engine.PslProblem;
 import de.tuebingen.sfs.psl.engine.RuleAtomGraph;
 import de.tuebingen.sfs.psl.talk.ConstantRenderer;
 import de.tuebingen.sfs.psl.talk.TalkingPredicate;
-import de.tuebingen.sfs.psl.talk.TalkingRule;
+import de.tuebingen.sfs.psl.talk.TalkingRuleOrConstraint;
 import de.tuebingen.sfs.psl.util.color.ColorUtils;
 import de.tuebingen.sfs.psl.util.color.HslColor;
 import de.tuebingen.sfs.psl.util.data.RankingEntry;
@@ -67,7 +67,7 @@ public class FactWindow {
     protected PslProblem pslProblem;
     protected Map<Rule, String> ruleToName = new HashMap<>();
     protected Map<String, TalkingPredicate> talkingPreds;
-    protected Map<String, TalkingRule> talkingRules;
+    protected Map<String, TalkingRuleOrConstraint> talkingRules;
     @FXML
     protected HBox detailBox; // used by EtinenFactWindow
     @FXML
@@ -143,7 +143,7 @@ public class FactWindow {
     }
 
     public FactWindow(ConstantRenderer renderer, RuleAtomGraph rag, Map<String, TalkingPredicate> talkingPreds,
-                      Map<String, TalkingRule> talkingRules, Map<String, Double> result, boolean presortSidebar,
+                      Map<String, TalkingRuleOrConstraint> talkingRules, Map<String, Double> result, boolean presortSidebar,
                       boolean printPaneContentsToConsole) {
         this(renderer, null, null, rag, result, talkingPreds, talkingRules, presortSidebar, printPaneContentsToConsole,
                 null);
@@ -154,7 +154,7 @@ public class FactWindow {
     // - RagViewer: graph, scoreMap, talkingPreds, talkingRules
     protected FactWindow(ConstantRenderer constantRenderer, PslProblem pslProblem, String atomName, RuleAtomGraph graph,
                          Map<String, Double> scoreMap, Map<String, TalkingPredicate> talkingPreds,
-                         Map<String, TalkingRule> talkingRules, Boolean presortSidebar,
+                         Map<String, TalkingRuleOrConstraint> talkingRules, Boolean presortSidebar,
                          Boolean printPaneContentsToConsole, Boolean showOnlyRagAtoms) {
         this.pslProblem = pslProblem; // Can be null.
         this.graph = graph;
@@ -169,7 +169,7 @@ public class FactWindow {
         } else {
             this.talkingPreds = pslProblem.getTalkingPredicates();
             this.talkingRules = pslProblem.getTalkingRules();
-            for (TalkingRule rule : this.talkingRules.values()) {
+            for (TalkingRuleOrConstraint rule : this.talkingRules.values()) {
                 ruleToName.put(rule.getRule(), rule.getName());
             }
         }
@@ -363,7 +363,7 @@ public class FactWindow {
         return talkingPreds.get(encoded);
     }
 
-    protected Map<String, TalkingRule> getTalkingRules() {
+    protected Map<String, TalkingRuleOrConstraint> getTalkingRules() {
         if (pslProblem != null) return pslProblem.getTalkingRules();
         return talkingRules;
     }
@@ -584,7 +584,7 @@ public class FactWindow {
         return ruleToName.getOrDefault(rule, "<missing rule name>");
     }
 
-    protected String generateExplanation(Map<String, TalkingRule> talkingRules, String ruleName, String groundingName,
+    protected String generateExplanation(Map<String, TalkingRuleOrConstraint> talkingRules, String ruleName, String groundingName,
                                          String contextAtom, RuleAtomGraph rag, boolean whyExplanation) {
         if (!showRuleVerbalization) {
             StringBuilder sb = new StringBuilder();

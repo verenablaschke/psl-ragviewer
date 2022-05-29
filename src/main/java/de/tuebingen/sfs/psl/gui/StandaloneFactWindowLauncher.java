@@ -7,7 +7,7 @@ import de.tuebingen.sfs.psl.engine.PslProblem;
 import de.tuebingen.sfs.psl.engine.RuleAtomGraph;
 import de.tuebingen.sfs.psl.talk.ConstantRenderer;
 import de.tuebingen.sfs.psl.talk.TalkingPredicate;
-import de.tuebingen.sfs.psl.talk.TalkingRule;
+import de.tuebingen.sfs.psl.talk.TalkingRuleOrConstraint;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -24,7 +24,7 @@ public class StandaloneFactWindowLauncher extends Application {
     protected static boolean sortSidebar = false;
     protected static boolean printExplanationPanesToConsole = false;
     protected static Map<String, TalkingPredicate> talkingPreds = null;
-    protected static Map<String, TalkingRule> talkingRules = null;
+    protected static Map<String, TalkingRuleOrConstraint> talkingRules = null;
 
     public static void launchWithData(PslProblem pslProb, RuleAtomGraph graph, Map<String, Double> valueMap) {
         pslProblem = pslProb;
@@ -39,7 +39,7 @@ public class StandaloneFactWindowLauncher extends Application {
     }
 
     public static void launchWithData(InferenceResult inferenceResult, Map<String, TalkingPredicate> talkingPredsMap,
-                                      Map<String, TalkingRule> talkingRulesMap, boolean sortSidebarDesc,
+                                      Map<String, TalkingRuleOrConstraint> talkingRulesMap, boolean sortSidebarDesc,
                                       boolean printPaneContentsToConsole) {
         talkingPreds = talkingPredsMap;
         talkingRules = talkingRulesMap;
@@ -56,7 +56,7 @@ public class StandaloneFactWindowLauncher extends Application {
     }
 
     public static void launchWithData(InferenceResult inferenceResult, Map<String, TalkingPredicate> talkingPredsMap,
-                                      Map<String, TalkingRule> talkingRulesMap) {
+                                      Map<String, TalkingRuleOrConstraint> talkingRulesMap) {
         launchWithData(inferenceResult, talkingPredsMap, talkingRulesMap, true, false);
     }
 
