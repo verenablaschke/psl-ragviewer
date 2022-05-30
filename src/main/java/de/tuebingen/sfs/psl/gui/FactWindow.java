@@ -119,7 +119,7 @@ public class FactWindow {
     protected Stack<String> nextAtoms;
     protected Stack<String> previousAtoms;
     protected boolean presortSidebar;
-    protected boolean displayDistToSatisfaction;
+    protected boolean displayDistToSatisfaction = true;
     protected boolean displayCounterfactual;
     protected boolean printPaneContentsToConsole;
     // Maps for atom elements
@@ -320,7 +320,7 @@ public class FactWindow {
             showRuleVerbalization = !internalRuleRepChoice.isSelected();
             setFacts(graph);
         });
-        distToSatisfactionChoice.setSelected(false);
+        distToSatisfactionChoice.setSelected(true);
         distToSatisfactionChoice.setOnAction((ActionEvent event) -> {
             displayDistToSatisfaction = distToSatisfactionChoice.isSelected();
             setFacts(graph);
@@ -639,10 +639,10 @@ public class FactWindow {
         Collections.sort(entries);
         for (Explanation entry : entries) {
             String explanation = entry.getText();
-            if (displayDistToSatisfaction && !entry.isFixed()) {
-                explanation = entry.getDisplayableDissatisfaction() + ": " + explanation;
-            }
 //            explanation = entry.getSummary() + explanation;
+            if (displayDistToSatisfaction && !entry.isFixed() && entry.isDissatisfied()) {
+                explanation = entry.getDisplayableDissatisfaction() + " " + explanation;
+            }
             if (entry.isConstraint()) {
                 explanation = "⬛ " + explanation;
             } else if (!entry.isFixed()) {

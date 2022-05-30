@@ -70,13 +70,14 @@ public class Explanation implements Comparable<Explanation> {
     }
 
     public String getDisplayableDissatisfaction() {
-        if (isConstraint) {
-            if (isViolatedConstraint()) {
-                return "∞ [" + FactWindow.formatValue(dissatisfaction) + "]";
-            }
-            return FactWindow.formatValue(0.0);
+        if (isViolatedConstraint()) {
+            // "Lightning mood" emoji
+            return "\uD83D\uDDF2(∞ [" + FactWindow.formatValue(dissatisfaction) + "])";
         }
-        return FactWindow.formatValue(dissatisfaction);
+        if (dissatisfaction > RuleAtomGraph.DISSATISFACTION_PRECISION) {
+            return "\uD83D\uDDF2(" + FactWindow.formatValue(dissatisfaction) +")";
+        }
+        return FactWindow.formatValue(0.0);
     }
 
     public String getDisplayableCounterfactualDissatisfaction() {
