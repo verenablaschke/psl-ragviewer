@@ -714,13 +714,16 @@ public class FactWindow {
 
     protected String verbalizeAtom(TalkingPredicate tPred, String internalForm, Double score) {
         if (internalForm.isEmpty()) return "";
+        String verbalization;
         if (constantRenderer != null) {
             List<String> args = getAtomElements(internalForm);
             args = args.subList(1, args.size());
-            return tPred.verbalizeIdeaAsSentence(constantRenderer, score, args.toArray(new String[args.size()]));
+            verbalization = tPred.verbalizeIdeaAsSentence(constantRenderer, score, args.toArray(new String[args.size()]));
         }
         List<String> args = getDisplayArguments(internalForm);
-        return tPred.verbalizeIdeaAsSentence(constantRenderer, score, args.toArray(new String[args.size()]));
+        verbalization = tPred.verbalizeIdeaAsSentence(constantRenderer, score, args.toArray(new String[args.size()]));
+        return verbalization.substring(0, 1).toUpperCase() + verbalization.substring(1) +
+                (verbalization.endsWith(".") ? "" : ".");
     }
 
     public static String formatValue(double value) {
