@@ -75,7 +75,7 @@ public class Explanation implements Comparable<Explanation> {
             return "\uD83D\uDDF2(∞ [" + FactWindow.formatValue(dissatisfaction) + "])";
         }
         if (dissatisfaction > RuleAtomGraph.DISSATISFACTION_PRECISION) {
-            return "\uD83D\uDDF2(" + FactWindow.formatValue(dissatisfaction) +")";
+            return "\uD83D\uDDF2(" + FactWindow.formatValue(dissatisfaction) + ")";
         }
         return FactWindow.formatValue(0.0);
     }
@@ -132,13 +132,13 @@ public class Explanation implements Comparable<Explanation> {
         if (!isConstraint && counterfactualIsDissatisfied()) {
             return -6;
         }
-        if (isConstraint) {
-            if (active) {
+        if (active) {
+            if (isConstraint) {
                 return -5;
             }
             return -4;
         }
-        if (active) {
+        if (isConstraint) {
             return -3;
         }
         return 0;
@@ -149,7 +149,30 @@ public class Explanation implements Comparable<Explanation> {
         if (other == null) {
             return -1;
         }
-        return Integer.compare(comparisonScore(), other.comparisonScore());
+        int compScore = comparisonScore();
+        int surfaceComp = Integer.compare(compScore, other.comparisonScore());
+        if (surfaceComp != 0) {
+            return surfaceComp;
+        }
+
+        if (compScore == -10) {
+            // Both are fixed.
+            return 0;
+        }
+        if (compScore == -9 || compScore == -8) {
+            // Both are violated constraints or dissatisfied weighted rules.
+            if (Math.abs(dissatisfaction - other.dissatisfaction) < RuleAtomGraph.DISSATISFACTION_PRECISION) {
+                return Double.compare(-counterfactualDissatisfaction, -other.dissatisfaction);
+            }
+            return Double.compare(-dissatisfaction, -other.dissatisfaction);
+        }
+        if (compScore == -7 || compScore == -6) {
+            // Both are satisfied constraints or rules with dissatisfied counterfactuals.
+            return Double.compare(-counterfactualDissatisfaction, -other.dissatisfaction);
+        }
+
+        // Nothing left to compare.
+        return 0;
     }
 
 
