@@ -367,6 +367,12 @@ public class FactWindow {
         return talkingPreds.get(encoded);
     }
 
+    protected Pair<TalkingPredicate, String[]> getTalkingPredicateWithArgs(String atom) {
+        String[] parts = surfaceAtomToEncoded.get(atom).split("\\(");
+        String[] args = parts[1].substring(0, parts[1].length() - 1).split(",\\s?");
+        return new Pair<>(getTalkingPredicate(parts[0]), args);
+    }
+
     protected Map<String, TalkingRuleOrConstraint> getTalkingRules() {
         if (pslProblem != null) return pslProblem.getTalkingRules();
         return talkingRules;
@@ -560,7 +566,9 @@ public class FactWindow {
         expl.setCounterfactualDissatisfaction(counterfactualDist);
         StringBuilder sb = new StringBuilder("\n");
         if (showRuleVerbalization) {
-            sb.append("If ").append(contextAtom).append(" had had a value of ");
+            Pair<TalkingPredicate, String[]> predAndArgs = getTalkingPredicateWithArgs(contextAtom);
+            sb.append("If ").append(predAndArgs.first.verbalizeIdeaAsNP(constantRenderer, predAndArgs.second));
+            sb.append(" had had a value of ");
             sb.append(formatAsPercentage(counterfactualAtomVal));
             sb.append(", then the distance to satisfaction would have ");
             if (expl.counterfactualIsDissatisfied()) {
