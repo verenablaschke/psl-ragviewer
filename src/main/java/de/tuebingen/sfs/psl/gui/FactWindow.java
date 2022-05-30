@@ -352,9 +352,8 @@ public class FactWindow {
         // Set various display possibilities for atom belief
         beliefValueLabel.textProperty().bind(Bindings.when(currentAtom.isEmpty()).then("").otherwise(
                 Bindings.when(currentScore.greaterThan(1.0)).then("+").otherwise(
-                        Bindings.when(currentScore.lessThan(0.0)).then("-")
-                                .otherwise(Bindings.format(Locale.ENGLISH, PERCENTAGE_FORMAT,
-                                        currentScore.multiply(100))))));
+                        Bindings.when(currentScore.lessThan(0.0)).then("-").otherwise(
+                                Bindings.format(Locale.ENGLISH, PERCENTAGE_FORMAT, currentScore.multiply(100))))));
 
     }
 
@@ -563,23 +562,16 @@ public class FactWindow {
         if (showRuleVerbalization) {
             sb.append("If ").append(contextAtom).append(" had had a value of ");
             sb.append(formatAsPercentage(counterfactualAtomVal));
-            sb.append(", then the distance to satisfaction would have been ");
-            sb.append(expl.getDisplayableCounterfactualDissatisfaction()).append(".");
+            sb.append(", then the distance to satisfaction would have ");
+            if (expl.counterfactualIsDissatisfied()) {
+                sb.append("been ").append(expl.getDisplayableCounterfactualDissatisfaction()).append(".");
+            } else {
+                sb.append("stayed at 0.");
+            }
         } else {
             sb.append("  ").append(expl.getDisplayableCounterfactualDissatisfaction());
             sb.append(": if value were ");
             sb.append(formatValue(counterfactualAtomVal));
-        }
-        if (!expl.isConstraint()) {
-            double distDiff = counterfactualDist - dist;
-            if (Math.abs(distDiff) > RuleAtomGraph.DISSATISFACTION_PRECISION) {
-                sb.append(" (");
-                if (distDiff > 0) {
-                    sb.append("+");
-                }
-                sb.append(formatValue(distDiff));
-                sb.append(")");
-            }
         }
         expl.setText(expl.getText() + sb.toString());
     }
@@ -718,7 +710,8 @@ public class FactWindow {
         if (constantRenderer != null) {
             List<String> args = getAtomElements(internalForm);
             args = args.subList(1, args.size());
-            verbalization = tPred.verbalizeIdeaAsSentence(constantRenderer, score, args.toArray(new String[args.size()]));
+            verbalization = tPred.verbalizeIdeaAsSentence(constantRenderer, score,
+                    args.toArray(new String[args.size()]));
         }
         List<String> args = getDisplayArguments(internalForm);
         verbalization = tPred.verbalizeIdeaAsSentence(constantRenderer, score, args.toArray(new String[args.size()]));
