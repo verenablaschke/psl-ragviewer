@@ -57,8 +57,7 @@ import java.util.stream.Collectors;
 public class FactWindow {
 
     protected static final Pattern ATOM_START_PATTERN = Pattern.compile("\\w{4,}\\(");
-    public static final String SCORE_FORMAT = "%.2f";
-    public static final String SCORE_PERCENTAGE_FORMAT = "%.0f %%";
+    protected static final String PERCENTAGE_FORMAT = "%.0f %%";
     // Display choices
     protected boolean showOnlyRagAtoms;
     protected boolean showRuleVerbalization = true;
@@ -354,7 +353,8 @@ public class FactWindow {
         beliefValueLabel.textProperty().bind(Bindings.when(currentAtom.isEmpty()).then("").otherwise(
                 Bindings.when(currentScore.greaterThan(1.0)).then("+").otherwise(
                         Bindings.when(currentScore.lessThan(0.0)).then("-")
-                                .otherwise(Bindings.format(Locale.ENGLISH, SCORE_PERCENTAGE_FORMAT, currentScore.multiply(100))))));
+                                .otherwise(Bindings.format(Locale.ENGLISH, PERCENTAGE_FORMAT,
+                                        currentScore.multiply(100))))));
 
     }
 
@@ -561,14 +561,14 @@ public class FactWindow {
         expl.setCounterfactualDissatisfaction(counterfactualDist);
         StringBuilder sb = new StringBuilder("\n");
         if (showRuleVerbalization) {
-            sb.append("If ").append(contextAtom).append(" had had a value of ")
-                    .append(String.format(SCORE_PERCENTAGE_FORMAT, 100 * counterfactualAtomVal));
+            sb.append("If ").append(contextAtom).append(" had had a value of ");
+            sb.append(formatAsPercentage(counterfactualAtomVal));
             sb.append(", then the distance to satisfaction would have been ");
             sb.append(expl.getDisplayableCounterfactualDissatisfaction()).append(".");
         } else {
             sb.append("  ").append(expl.getDisplayableCounterfactualDissatisfaction());
-            sb.append(": if score were ");
-            sb.append(String.format(SCORE_FORMAT, counterfactualAtomVal));
+            sb.append(": if value were ");
+            sb.append(formatValue(counterfactualAtomVal));
         }
         if (!expl.isConstraint()) {
             double distDiff = counterfactualDist - dist;
@@ -577,7 +577,7 @@ public class FactWindow {
                 if (distDiff > 0) {
                     sb.append("+");
                 }
-                sb.append(String.format(SCORE_FORMAT, distDiff));
+                sb.append(formatValue(distDiff));
                 sb.append(")");
             }
         }
@@ -615,7 +615,7 @@ public class FactWindow {
                     if (belief == null) {
                         sb.append("???");
                     } else {
-                        sb.append(SCORE_FORMAT.formatted(belief));
+                        sb.append(formatValue(belief));
                     }
                     sb.append("]");
                 } else {
@@ -721,6 +721,14 @@ public class FactWindow {
         }
         List<String> args = getDisplayArguments(internalForm);
         return tPred.verbalizeIdeaAsSentence(constantRenderer, score, args.toArray(new String[args.size()]));
+    }
+
+    public static String formatValue(double value) {
+        return String.format(Locale.ENGLISH, "%.2f", value);
+    }
+
+    public static String formatAsPercentage(double value) {
+        return String.format(Locale.ENGLISH, PERCENTAGE_FORMAT, value * 100);
     }
 
     public static class ExitHandler implements EventHandler<ActionEvent> {

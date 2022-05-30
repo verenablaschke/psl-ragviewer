@@ -72,21 +72,21 @@ public class Explanation implements Comparable<Explanation> {
     public String getDisplayableDissatisfaction() {
         if (isConstraint) {
             if (isViolatedConstraint()) {
-                return "∞ [" + String.format(FactWindow.SCORE_FORMAT, dissatisfaction) + "]";
+                return "∞ [" + FactWindow.formatValue(dissatisfaction) + "]";
             }
-            return String.format(FactWindow.SCORE_FORMAT, 0.0);
+            return FactWindow.formatValue(0.0);
         }
-        return String.format(FactWindow.SCORE_FORMAT, dissatisfaction);
+        return FactWindow.formatValue(dissatisfaction);
     }
 
     public String getDisplayableCounterfactualDissatisfaction() {
         if (isConstraint) {
             if (isViolatedCounterfactualConstraint()) {
-                return "∞ [" + String.format(FactWindow.SCORE_FORMAT, counterfactualDissatisfaction) + "]";
+                return "∞ [" + FactWindow.formatValue(counterfactualDissatisfaction) + "]";
             }
-            return String.format(FactWindow.SCORE_FORMAT, 0.0);
+            return FactWindow.formatValue(0.0);
         }
-        return String.format(FactWindow.SCORE_FORMAT, counterfactualDissatisfaction);
+        return FactWindow.formatValue(counterfactualDissatisfaction);
     }
 
     public boolean isActive() {
