@@ -103,6 +103,8 @@ public class AtomVerbalizationRenderer {
 					String linkText = (optional.isEmpty()) ? entry : optional;
 					Hyperlink link = new Hyperlink(linkText);
 					link.setPadding(new Insets(0));
+					link.setWrapText(true);
+					// TODO ^ requires setting the prefWidth: label.prefWidthProperty().bind...
 					tf.getChildren().add(link);
 					link.setOnAction(event -> {
 						fw.onFormSelection(linkEntry);

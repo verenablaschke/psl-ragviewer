@@ -672,7 +672,7 @@ public class FactWindow {
             textFlow.setOnContextMenuRequested(event -> menu.show(textFlow, event.getScreenX(), event.getScreenY()));
 
             if (!entry.isActive()) {
-                textFlow.setOpacity(0.5);
+                textFlow.setOpacity(0.6);
             }
 
             vbox.getChildren().add(textFlow);
