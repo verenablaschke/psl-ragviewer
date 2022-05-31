@@ -595,8 +595,14 @@ public class FactWindow {
         if (!showRuleVerbalization) {
             StringBuilder sb = new StringBuilder();
             GroundRule rule = graph.getRuleForGrounding(groundingName);
-            sb.append(getNameForRule(rule.getRule())).append(": ");
-            String ruleStr = rule.toString().replaceAll("', '", "','");
+            sb.append(getNameForRule(rule.getRule()));
+            String ruleStr = rule.toString().replaceAll("', '", "','").strip();
+            if (ruleStr.endsWith(")")) {
+                String[] weightAndRule = ruleStr.substring(0, ruleStr.length() - 1).split("\\(", 2);
+                sb.append(" (×").append(weightAndRule[0]).append(")");
+                ruleStr = weightAndRule[1];
+            }
+            sb.append(": ");
             boolean prevWasOpeningQuote = false;
             for (String element : ruleStr.split("\\s+")) {
                 Matcher matcher = ATOM_START_PATTERN.matcher(element);
