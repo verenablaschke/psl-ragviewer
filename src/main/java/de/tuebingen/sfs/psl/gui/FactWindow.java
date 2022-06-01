@@ -599,7 +599,7 @@ public class FactWindow {
             String ruleStr = rule.toString().replaceAll("', '", "','").strip();
             if (ruleStr.endsWith(")")) {
                 String[] weightAndRule = ruleStr.substring(0, ruleStr.length() - 1).split("\\(", 2);
-                sb.append(" (×").append(weightAndRule[0]).append(")");
+                sb.append(" (×").append(weightAndRule[0].replace(":", "").strip()).append(")");
                 ruleStr = weightAndRule[1];
             }
             sb.append(": ");
