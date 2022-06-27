@@ -6,8 +6,6 @@ The `FactWindow` is a JavaFX-based atom browser that explains each atom's inferr
 The associated rules can be shown in the form of rule groundings or as textual explanations that express how the context atom's value fits into the rule's reasoning pattern, or how it violates it.
 To create a PSL RAG that is inspectable this way, use the code in the [psl-infrastructure](https://github.com/jdellert/psl-infrastructure) package, which provides a Java API for the [PSL framework](https://psl.linqs.org/) as well as the code necessary for creating natural language verbalization templates of rules and predicates.
 
-_PSL Ragviewer_ requires a version of Java containing JavaFX, such as the [Liberica 17 full(!) JDK](https://bell-sw.com/pages/downloads/#/java-17-lts).
-
 # Usage
 ```
 import de.tuebingen.sfs.psl.engine.InferenceResult;
