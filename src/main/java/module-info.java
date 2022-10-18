@@ -9,5 +9,7 @@ module de.tuebingen.sfs.psl.gui {
     requires javafx.controls;
     requires javafx.fxml;
     opens de.tuebingen.sfs.psl.gui;
+    requires org.apache.logging.log4j;
+    requires org.apache.logging.log4j.core;
 //    opens fx;
 }
